@@ -57,7 +57,7 @@ function draw(){
 
       /* delete dead particles */
       for(var i = particles.length - 1; i >= 0; i--){
-          if(particles[i].life == 0){
+          if(particles[i].life <= 0){
                 particles.splice(i, 1);
             }
       }

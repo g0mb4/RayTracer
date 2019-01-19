@@ -18,7 +18,6 @@ class Particle {
             this.vel = this.vel.subtract(m.normal.multiply(2 * this.vel.dot(m.normal)));
 
             /* create new points for the next line */
-            this.life--;
             this.path.push({x: this.pos.x, y: this.pos.y, z: this.pos.z});
             this.path.push({x: this.pos.x, y: this.pos.y, z: this.pos.z});
             return true;
@@ -36,10 +35,11 @@ class Particle {
         if(d_n1 > s.r && d_n2 <= s.r){
             var pos = this.pos;
             var normal = s.pos.subtract(pos).unit();
+            this.life--;
 
             // reflected
             var vel_reflected = this.vel.subtract(normal.multiply(2 * this.vel.dot(normal)));
-            casted.push(new Particle(pos, vel_reflected, GLOBL_LIFE, GLOBL_DEATH_RADIUS));
+            casted.push(new Particle(pos, vel_reflected, this.life, GLOBL_DEATH_RADIUS));
 /*
             // refracted
             var n1 = 1; // air
@@ -51,7 +51,6 @@ class Particle {
             this.vel = this.vel.multiply(r).add(normal.multiply(r * c - Math.sqrt(1-(r*r)*(1-c*c))));
 */
             /* create new points for the next line */
-            this.life--;
             this.path.push({x: this.pos.x, y: this.pos.y, z: this.pos.z});
             this.path.push({x: this.pos.x, y: this.pos.y, z: this.pos.z});
 
@@ -59,16 +58,15 @@ class Particle {
         } else if(d_n1 <= s.r && d_n2 > s.r){
             var pos = this.pos.add(this.vel);
             var normal = s.pos.subtract(pos).unit();
+            this.life--;
 
             // reflected
             var vel_reflected = this.vel.subtract(normal.multiply(2 * this.vel.dot(normal)));
-            casted.push(new Particle(pos, vel_reflected, GLOBL_LIFE, GLOBL_DEATH_RADIUS));
+            casted.push(new Particle(pos, vel_reflected, this.life, GLOBL_DEATH_RADIUS));
 
             // refracted
 
-
             /* create new points for the next line */
-            this.life--;
             this.path.push({x: this.pos.x, y: this.pos.y, z: this.pos.z});
             this.path.push({x: this.pos.x, y: this.pos.y, z: this.pos.z});
         }
