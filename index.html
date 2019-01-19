@@ -11,26 +11,46 @@
         <div id="canvas">
             <!-- canvas will go here! -->
         </div>
+        <p id="infos"></p>
         <div id="control">
             <table>
                 <tr>
-                    <td><button onclick="simRestart(); run_sim = true;">Start Simulation</button></td>
-                    <td>mesh_size</td>
-                    <td><input id="mesh_size" value="20"/> unit (-1 = 1 test beam)</td>
+                    <td><button onclick="run_sim = true;">Start Simulation</button></td>
+                    <td>alpha</td>
+                    <td><input id="alpha" value="0" size="10"/> deg</td>
+                    <td>width_of_lamp</td>
+                    <td><input id="width_of_lamp" value="600" size="10"/> unit</td>
                 </tr>
                 <tr>
                     <td><button onclick="run_sim = false;">Stop Simulation</button></td>
-                    <td>beam_life</td>
-                    <td><input id="life" value="5"/> number of splits</td>
+                    <td>beta</td>
+                    <td><input id="beta" value="90" size="10"/> deg</td>
+                    <td>height_of_lamp</td>
+                    <td><input id="height_of_lamp" value="300" size="10"/> unit</td>
                 </tr>
                 <tr>
-                    <td><button onclick="simRestart()">Restart Simulation</button></td>
+                    <td><button onclick="simRestart(); run_sim = true;">Restart Simulation</button></td>
+                    <td>gamma</td>
+                    <td><input id="gamma" value="90" size="10"/> deg</td>
+                    <td>beams</td>
+                    <td><input id="number_of_beams" value="20" size="10"/> (-1 = 1 test beam)</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>beam_life</td>
+                    <td><input id="life" value="5" size="10"/> number of splits</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
                     <td>death_radius</td>
-                    <td><input id="death_radius" value="400"/> unit (-1 = ignore this paramater)</td>
+                    <td><input id="death_radius" value="500" size="10"/> unit (-1 = ignore this paramater)</td>
                 </tr>
             </table>
-            <p id="no_collisions"></p>
-            <p id="no_rays"></p>
+            <img src="imgs/direction_angles.png">
         </div>
     </body>
 </html>

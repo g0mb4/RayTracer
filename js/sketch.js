@@ -5,9 +5,6 @@ var particles = [];
 var totalCollsisions;
 var run_sim;
 
-var GLOBL_LIFE = 5;
-var GLOBL_DEATH_RADIUS = 350;
-
 function setup() {
     var canvas = createCanvas(800, 600, WEBGL);
     canvas.parent('canvas');
@@ -20,18 +17,32 @@ function setup() {
 }
 
 function simRestart(){
-    GLOBL_LIFE = parseInt(document.getElementById('life').value);
-    GLOBL_DEATH_RADIUS = parseInt(document.getElementById('death_radius').value);
+    var life = parseInt(document.getElementById('life').value);
+    var death_radius = parseInt(document.getElementById('death_radius').value);
 
-    var mesh_size = parseInt(document.getElementById('mesh_size').value);
+    var width_of_lamp = parseInt(document.getElementById('width_of_lamp').value);
+    var height_of_lamp = parseInt(document.getElementById('height_of_lamp').value);
+
+    var no_beams = parseInt(document.getElementById('number_of_beams').value);
+
+    var mesh_size_y = Math.floor(width_of_lamp/Math.sqrt(no_beams));
+    var mesh_size_z = Math.floor(height_of_lamp/Math.sqrt(no_beams));
+
+
+    var cos_alpha = Math.cos(radians(parseFloat(document.getElementById('alpha').value)));
+    var cos_beta = Math.cos(radians(parseFloat(document.getElementById('beta').value)));
+    var cos_gamma = Math.cos(radians(parseFloat(document.getElementById('gamma').value)));
+
+    var v0 = new Vector(cos_alpha, cos_beta, cos_gamma);
 
     particles = [];
-    if(mesh_size < 0){
-        particles.push(new Particle(new Vector(-300, 0, 100), new Vector(1, 0, -0.5), GLOBL_LIFE, GLOBL_DEATH_RADIUS));
+    var n = 0;
+    if(no_beams < 0){
+        particles.push(new Particle(new Vector(-300, 0, 100), v0, life, death_radius));
     } else {
-        for(var y = -200; y < 300; y += mesh_size){
-            for(var z = 0; z < 300; z += mesh_size){
-                particles.push(new Particle(new Vector(-300, y, z), new Vector(1, 0, -0.5), GLOBL_LIFE, GLOBL_DEATH_RADIUS));
+        for(var y = -width_of_lamp/2; y < width_of_lamp/2; y += mesh_size_y){
+            for(var z = 1; z < height_of_lamp; z += mesh_size_z){
+                particles.push(new Particle(new Vector(-300, y, z), v0, life, death_radius));
             }
         }
     }
@@ -74,6 +85,5 @@ function draw(){
     mirror.show();
     s1.show();
 
-    document.getElementById('no_collisions').innerHTML = "Total collisions with the mirror: " + totalCollsisions;
-    document.getElementById('no_rays').innerHTML = "Number of rays: " + particles.length;
+    document.getElementById('infos').innerHTML = "total collisions with the mirror: " + totalCollsisions + " , number of rays: " + particles.length;
 }

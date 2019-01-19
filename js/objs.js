@@ -1,7 +1,7 @@
 class Particle {
     constructor(p, v, l, d){
         this.pos = p;
-        this.vel = v.unit();
+        this.vel = v;
         this.life = l;
         this.death_radius = d;
 
@@ -38,8 +38,8 @@ class Particle {
             this.life--;
 
             // reflected
-            var vel_reflected = this.vel.subtract(normal.multiply(2 * this.vel.dot(normal)));
-            casted.push(new Particle(pos, vel_reflected, this.life, GLOBL_DEATH_RADIUS));
+            var vel_reflected = this.vel.subtract(normal.multiply(2 * this.vel.dot(normal))).unit();
+            casted.push(new Particle(pos, vel_reflected, this.life, this.death_radius));
 /*
             // refracted
             var n1 = 1; // air
@@ -61,8 +61,8 @@ class Particle {
             this.life--;
 
             // reflected
-            var vel_reflected = this.vel.subtract(normal.multiply(2 * this.vel.dot(normal)));
-            casted.push(new Particle(pos, vel_reflected, this.life, GLOBL_DEATH_RADIUS));
+            var vel_reflected = this.vel.subtract(normal.multiply(2 * this.vel.dot(normal))).unit();
+            casted.push(new Particle(pos, vel_reflected, this.life, this.death_radius));
 
             // refracted
 
