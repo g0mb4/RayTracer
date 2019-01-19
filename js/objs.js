@@ -1,9 +1,13 @@
 class Particle {
-    constructor(p, v){
+    constructor(p, v, l, d){
         this.pos = p;
         this.vel = v.unit();
+        this.life = l;
+        this.death_radius = d;
 
         this.path = [];
+
+        /* two points of the line */
         this.path.push({x: this.pos.x, y: this.pos.y, z: this.pos.z});
         this.path.push({x: this.pos.x, y: this.pos.y, z: this.pos.z});
     }
@@ -13,6 +17,8 @@ class Particle {
         if(this.pos.z + this.vel.z <= 0){
             this.vel = this.vel.subtract(m.normal.multiply(2 * this.vel.dot(m.normal)));
 
+            /* create new points for the next line */
+            this.life--;
             this.path.push({x: this.pos.x, y: this.pos.y, z: this.pos.z});
             this.path.push({x: this.pos.x, y: this.pos.y, z: this.pos.z});
             return true;
@@ -33,7 +39,7 @@ class Particle {
 
             // reflected
             var vel_reflected = this.vel.subtract(normal.multiply(2 * this.vel.dot(normal)));
-            casted.push(new Particle(pos, vel_reflected));
+            casted.push(new Particle(pos, vel_reflected, GLOBL_LIFE, GLOBL_DEATH_RADIUS));
 /*
             // refracted
             var n1 = 1; // air
@@ -44,6 +50,8 @@ class Particle {
 
             this.vel = this.vel.multiply(r).add(normal.multiply(r * c - Math.sqrt(1-(r*r)*(1-c*c))));
 */
+            /* create new points for the next line */
+            this.life--;
             this.path.push({x: this.pos.x, y: this.pos.y, z: this.pos.z});
             this.path.push({x: this.pos.x, y: this.pos.y, z: this.pos.z});
 
@@ -54,10 +62,13 @@ class Particle {
 
             // reflected
             var vel_reflected = this.vel.subtract(normal.multiply(2 * this.vel.dot(normal)));
-            casted.push(new Particle(pos, vel_reflected));
+            casted.push(new Particle(pos, vel_reflected, GLOBL_LIFE, GLOBL_DEATH_RADIUS));
 
             // refracted
 
+
+            /* create new points for the next line */
+            this.life--;
             this.path.push({x: this.pos.x, y: this.pos.y, z: this.pos.z});
             this.path.push({x: this.pos.x, y: this.pos.y, z: this.pos.z});
         }
@@ -66,7 +77,10 @@ class Particle {
     updatePos(){
         this.pos = this.pos.add(this.vel);
 
-        if(this.pos.x < 300 && this.pos.x > -300){
+        /* just update teh 2nd position of the line */
+        if(this.death_radius > 0 && Vector.distance(this.pos, new Vector(0, 0, 0)) >= this.death_radius){
+            this.life = 0;
+        } else {
             var len = this.path.length;
             this.path[len - 1].x = this.pos.x;
             this.path[len - 1].y = this.pos.y;
