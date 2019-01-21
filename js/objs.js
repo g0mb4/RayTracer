@@ -13,6 +13,9 @@ class Particle {
 
         this.path = [];
 
+        this.spawn_lock = 0;
+        this.spawn_lock_max = 30;
+
         /* two points of the line */
         this.path.push({x: this.pos.x, y: this.pos.y, z: this.pos.z});
         this.path.push({x: this.pos.x, y: this.pos.y, z: this.pos.z});
@@ -46,6 +49,7 @@ class Particle {
             // reflected
             var vel_reflected = this.vel.subtract(normal.multiply(2 * this.vel.dot(normal))).unit();
             //console.log("enter_reflect");
+            this.spawn_lock = this.spawn_lock_max;   // solve double cast (numeric error)
             casted.push(new Particle(pos, vel_reflected, this.life - 1, this.death_radius));
 
             // refracted
@@ -97,11 +101,15 @@ class Particle {
                     // Either there were no solutions to the quadratic equation,
                     // or all solutions caused the refracted ray to bend 90 degrees
                     // or more, which is not possible.
-                    this.vel = new Vector(0, 0, 0);
+                    this.vel = new Vector(0, 0, 0); // TODO: solve this
                } else {
                     this.vel = refractDir;
                }
             }
+
+            /*
+                TODO: https://en.wikipedia.org/wiki/Fresnel_equations
+             */
 
             this.life--;
             /* create new points for the next line */
@@ -116,6 +124,7 @@ class Particle {
             // reflected
             var vel_reflected = this.vel.subtract(normal.multiply(2 * this.vel.dot(normal))).unit();
             //console.log("exit_reflect");
+            this.spawn_lock = this.spawn_lock_max;  // solve double cast (numeric error)
             casted.push(new Particle(pos.subtract(this.vel), vel_reflected, this.life-1, this.death_radius));
 
             // refracted

@@ -61,21 +61,27 @@ function draw(){
               totalCollsisions++;
           }
 
-          p.collideSphere(s1, newCasted);
-          p.updatePos();
-      }
+          /* ugly way to solve numeric error :( */
+          if(p.spawn_lock > 0){
+              p.spawn_lock--;
+          } else {
+              p.collideSphere(s1, newCasted);
+          }
 
-      /* delete dead particles */
-      for(var i = particles.length - 1; i >= 0; i--){
-          if(particles[i].life <= 0){
-                particles.splice(i, 1);
-            }
+          p.updatePos();
       }
 
       /* add casted particles */
       for(p of newCasted){
           particles.push(p);
       }
+    }
+
+    /* delete dead particles */
+    for(var i = particles.length - 1; i >= 0; i--){
+        if(particles[i].life <= 0){
+              particles.splice(i, 1);
+          }
     }
 
     for(p of particles){
