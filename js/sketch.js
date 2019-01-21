@@ -28,7 +28,6 @@ function simRestart(){
     var mesh_size_y = Math.floor(width_of_lamp/Math.sqrt(no_beams));
     var mesh_size_z = Math.floor(height_of_lamp/Math.sqrt(no_beams));
 
-
     var cos_alpha = Math.cos(radians(parseFloat(document.getElementById('alpha').value)));
     var cos_beta = Math.cos(radians(parseFloat(document.getElementById('beta').value)));
     var cos_gamma = Math.cos(radians(parseFloat(document.getElementById('gamma').value)));
