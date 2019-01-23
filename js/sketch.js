@@ -2,8 +2,12 @@ var s1;
 var mirror;
 var particles = [];
 
-var totalCollsisions;
+var energy_limit;
 var run_sim;
+
+var total_collsisions;
+var total_energy;
+var minimal_system_energy = 0.00000001;
 
 function setup() {
     var canvas = createCanvas(800, 600, WEBGL);
@@ -17,7 +21,7 @@ function setup() {
 }
 
 function simRestart(){
-    var life = parseInt(document.getElementById('life').value);
+    energy_limit = parseFloat(document.getElementById('energy_limit').value);
     var death_radius = parseInt(document.getElementById('death_radius').value);
 
     var width_of_lamp = parseInt(document.getElementById('width_of_lamp').value);
@@ -37,15 +41,15 @@ function simRestart(){
     particles = [];
     var n = 0;
     if(no_beams < 0){
-        particles.push(new Particle(new Vector(-300, 0, 100), v0, life, death_radius));
+        particles.push(new Particle(new Vector(-300, 0, 100), v0, 1, death_radius));
     } else {
         for(var y = -width_of_lamp/2; y < width_of_lamp/2; y += mesh_size_y){
             for(var z = 1; z < height_of_lamp; z += mesh_size_z){
-                particles.push(new Particle(new Vector(-300, y, z), v0, life, death_radius));
+                particles.push(new Particle(new Vector(-300, y, z), v0, 1, death_radius));
             }
         }
     }
-    totalCollsisions = 0;
+    total_collsisions = 0;
     run_sim = true;
 }
 
@@ -58,7 +62,7 @@ function draw(){
       var newCasted = [];
       for(p of particles){
           if(p.collidePlaneMirror(mirror)){
-              totalCollsisions++;
+              total_collsisions++;
           }
 
           /* ugly way to solve numeric error :( */
@@ -75,20 +79,47 @@ function draw(){
       for(p of newCasted){
           particles.push(p);
       }
+
+      /* delete dead particles */
+      for(var i = particles.length - 1; i >= 0; i--){
+          if(particles[i].energy < energy_limit){
+                particles.splice(i, 1);
+            }
+      }
     }
 
-    /* delete dead particles */
-    for(var i = particles.length - 1; i >= 0; i--){
-        if(particles[i].life <= 0){
-              particles.splice(i, 1);
-          }
+    /* check energy */
+    total_energy = 0;
+    for(p of particles){
+        total_energy += p.energy;
+    }
+
+    if(total_energy < minimal_system_energy){
+      run_sim = false;
     }
 
     for(p of particles){
         p.show();
     }
+
     mirror.show();
     s1.show();
 
-    document.getElementById('infos').innerHTML = "total collisions with the mirror: " + totalCollsisions + " , number of rays: " + particles.length;
+    var info_str = "";
+
+    if(run_sim){
+      info_str += "RUNNING";
+    } else {
+      if(total_energy < minimal_system_energy){
+        info_str += "DONE";
+      } else {
+        info_str += "STOPPED";
+      }
+    }
+
+    info_str += " , total collisions with the mirror: " + total_collsisions;
+    info_str += " , number of rays: " + particles.length;
+    info_str += ", energy of the system: " + total_energy;
+
+    document.getElementById('infos').innerHTML = info_str;
 }
