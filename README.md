@@ -9,7 +9,7 @@ JavaScript solution, light "as a particle".
 Run ```index.html```
 
 ## CPP
-C++ solution, using a modified ray tracing engine made by [Hillsoft](https://github.com/Hillsoft/Raytracer-Tutorial).
+C++ solution, light "as ray", using a modified ray tracing engine made by [Hillsoft](https://github.com/Hillsoft/Raytracer-Tutorial).
 
 Using [freeglut 3.0.0.](http://freeglut.sourceforge.net/index.php#download) and [glui 2.36](https://sourceforge.net/projects/glui/).
 
