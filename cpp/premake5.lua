@@ -27,8 +27,7 @@ project "RayTracer"
 	
 	links
 	{
-		"lib_3rd/freeglut-3.0.0/lib/x64/freeglut.lib",
-		"lib_3rd/glui-2.36/src/msvc/lib/glui32.lib"
+		"lib_3rd/freeglut-3.0.0/lib/x64/freeglut.lib"
 	}
 	
 	postbuildcommands
@@ -44,7 +43,17 @@ project "RayTracer"
 	filter "configurations:Debug"
 		defines { "DEBUG" }
 		symbols "On"
+		
+		links
+		{
+			"lib_3rd/glui-2.36/src/msvc/lib/glui32d.lib"
+		}
 
 	filter "configurations:Release"
 		defines { "NDEBUG" }
 		optimize "On"
+		
+		links
+		{
+			"lib_3rd/glui-2.36/src/msvc/lib/glui32.lib"
+		}
