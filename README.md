@@ -54,7 +54,7 @@ Extract the glui archive into ```lib_3rd``` then compile glui: https://masdel.wo
     │   │           ├───example6.tlog
     │   │           └───_gluidll library.tlog
     │   └───tools
-	└───www
+    └───www
 ```
 
 Run ```premake5```:
