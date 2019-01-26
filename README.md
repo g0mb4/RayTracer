@@ -57,7 +57,7 @@ Extract the glui archive into ```lib_3rd``` then compile glui: https://masdel.wo
     └───www
 ```
 
-Run ```premake5```:
+Run [premake5](https://premake.github.io):
 
 ```premake vs2017```
 
