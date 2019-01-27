@@ -34,12 +34,12 @@ Vector::~Vector()
 {
 }
 
-inline float Vector::length2()
+float Vector::length2()
 {
 	return sqr(x) + sqr(y) + sqr(z);
 }
 
-inline float Vector::length()
+float Vector::length()
 {
 	return std::sqrt(length2());
 }

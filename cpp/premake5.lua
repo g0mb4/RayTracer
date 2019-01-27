@@ -39,6 +39,7 @@ project "RayTracer"
 		location "msvc"
 		cppdialect "C++17"
 		systemversion "latest"
+		defines { "_WIN" }
 
 	filter "configurations:Debug"
 		defines { "DEBUG" }
@@ -46,7 +47,8 @@ project "RayTracer"
 		
 		links
 		{
-			"lib_3rd/glui-2.36/src/msvc/lib/glui32d.lib"
+			"lib_3rd/glui-2.36/src/msvc/lib/glui32d.lib",
+			"lib_3rd/glui-2.36/src/msvc/lib/glui32.lib"	-- ???
 		}
 
 	filter "configurations:Release"

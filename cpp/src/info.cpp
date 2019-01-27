@@ -3,6 +3,11 @@
 void Info::Refresh(void) {
 	_set2D();
 
+	auto now = std::chrono::high_resolution_clock::now();
+	auto diff = now - _time;
+	auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(diff).count();
+	_time = now;
+
 	glColor3f(1.0f, 1.0f, 1.0f);
 
 	char buf[256];
@@ -11,6 +16,8 @@ void Info::Refresh(void) {
 
 		if (i.name == "MEM") {
 			si_getUsedMemory(buf, 256);
+		} else if (i.name == "FPS") {
+			sprintf_s(buf, 256, "%s: %.0f", i.name.c_str(), (1000.0f/(float)duration_ms));
 		}
 		else {
 			switch (i.type) {
@@ -21,6 +28,10 @@ void Info::Refresh(void) {
 			case PT_FLOAT:
 				sprintf_s(buf, 256, "%s: %.2f", i.name.c_str(), *(float*)i.ptr);
 				break;
+
+			case PT_STRING:
+				sprintf_s(buf, 256, "%s: %s", i.name.c_str(), (char*)i.ptr);
+				break;
 			}
 		}
 
@@ -30,15 +41,34 @@ void Info::Refresh(void) {
 	_set3D();
 }
 
+void Info::AddVariable(int x, int y, const char * name, void * ptr) {
+	_add_variable(x, y, name, (void *)ptr, PT_VOID);
+}
 
-void Info::AddVariable(int x, int y, const char * name, void * ptr, E_PTR_TYPE type) {
+void Info::AddVariable(int x, int y, const char * name, int * ptr) {
+	_add_variable(x, y, name, (void *)ptr, PT_INT);
+}
+
+void Info::AddVariable(int x, int y, const char * name, float * ptr) {
+	_add_variable(x, y, name, (void *)ptr, PT_FLOAT);
+}
+
+void Info::AddVariable(int x, int y, const char * name, const char * ptr) {
+	_add_variable(x, y, name, (void *)ptr, PT_STRING);
+}
+
+void Info::_add_variable(int x, int y, const char * name, void * ptr, E_PTR_TYPE type) {
 	info_pair_t info;
 	memset(&info, 0, sizeof(info));
 
 	info.x = x;
 	info.y = y;
 	info.name = std::string(name);
-	info.ptr = ptr;
+	if (type == PT_STRING) {
+		info.ptr = strdup((char*)ptr);
+	} else {
+		info.ptr = ptr;
+	}
 	info.type = type;
 
 	_variables.push_back(info);

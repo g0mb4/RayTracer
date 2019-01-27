@@ -25,8 +25,8 @@ struct Vector
 
 	virtual ~Vector();
 
-	inline float length2();
-	inline float length();
+	float length2();
+	float length();
 
 	Vector normal();
 	float normal_len();
