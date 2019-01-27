@@ -1,0 +1,150 @@
+﻿  algebra3.cpp
+  arcball.cpp
+  glui.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui.cpp(599): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui.cpp(602): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui.cpp(1922): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui.cpp(1925): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+  glui_add_controls.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+  glui_bitmaps.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+  glui_bitmap_img_data.cpp
+  glui_button.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+  glui_checkbox.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+  glui_column.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+  glui_commandline.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+  glui_control.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_control.cpp(214): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_control.cpp(213): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_control.cpp(904): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17763.0\ucrt\string.h(338): note: see declaration of 'strncpy'
+  glui_edittext.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_edittext.cpp(492): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_edittext.cpp(1142): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17763.0\ucrt\stdio.h(1774): note: see declaration of 'sprintf'
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_edittext.cpp(1163): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17763.0\ucrt\stdio.h(1774): note: see declaration of 'sprintf'
+  glui_filebrowser.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_filebrowser.cpp(119): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  glui_list.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_list.cpp(105): warning C4244: '=': conversion from 'time_t' to 'unsigned long', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_list.cpp(238): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_list.cpp(275): warning C4244: 'argument': conversion from 'int' to 'GLfloat', possible loss of data
+  glui_listbox.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_listbox.cpp(113): warning C4305: 'argument': truncation from 'double' to 'float'
+  glui_mouse_iaction.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_mouse_iaction.cpp(161): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_mouse_iaction.cpp(164): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_mouse_iaction.cpp(166): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_mouse_iaction.cpp(168): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_mouse_iaction.cpp(197): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_mouse_iaction.cpp(198): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+  glui_node.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+  glui_panel.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+  glui_radio.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_radio.cpp(95): warning C4244: 'argument': conversion from 'int' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_radio.cpp(94): warning C4244: 'argument': conversion from 'int' to 'GLfloat', possible loss of data
+  glui_rollout.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+  Generating Code...
+  Compiling...
+  glui_rotation.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_rotation.cpp(120): warning C4305: 'argument': truncation from 'double' to 'float'
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_rotation.cpp(136): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_rotation.cpp(143): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_rotation.cpp(144): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_rotation.cpp(153): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_rotation.cpp(154): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_rotation.cpp(310): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_rotation.cpp(411): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+  glui_scrollbar.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_scrollbar.cpp(368): warning C4244: 'argument': conversion from 'int' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_scrollbar.cpp(373): warning C4244: 'argument': conversion from 'int' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_scrollbar.cpp(397): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_scrollbar.cpp(398): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_scrollbar.cpp(399): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_scrollbar.cpp(400): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_scrollbar.cpp(614): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_scrollbar.cpp(776): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_scrollbar.cpp(815): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_scrollbar.cpp(816): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  glui_separator.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+  glui_spinner.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_spinner.cpp(153): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_spinner.cpp(155): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+  glui_statictext.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+  glui_string.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_string.cpp(48): warning C4996: '_vsnprintf': This function or variable may be unsafe. Consider using _vsnprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17763.0\ucrt\stdio.h(1400): note: see declaration of '_vsnprintf'
+  glui_textbox.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_textbox.cpp(349): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_textbox.cpp(432): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_textbox.cpp(443): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_textbox.cpp(488): warning C4244: 'argument': conversion from 'int' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_textbox.cpp(501): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_textbox.cpp(681): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_textbox.cpp(794): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_textbox.cpp(952): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_textbox.cpp(963): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_textbox.cpp(965): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_textbox.cpp(967): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_textbox.cpp(989): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_textbox.cpp(1051): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_textbox.cpp(1073): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 9 has type 'unsigned __int64'
+  o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_textbox.cpp(1073): note: consider using '%zd' in the format string
+  glui_translation.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_translation.cpp(200): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_translation.cpp(345): warning C4305: 'initializing': truncation from 'double' to 'float'
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_translation.cpp(352): warning C4305: 'argument': truncation from 'double' to 'float'
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_translation.cpp(353): warning C4305: 'argument': truncation from 'double' to 'float'
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_translation.cpp(372): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_translation.cpp(374): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_translation.cpp(431): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_translation.cpp(434): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_translation.cpp(463): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_translation.cpp(464): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_translation.cpp(465): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_translation.cpp(466): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_translation.cpp(467): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_translation.cpp(468): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+  glui_tree.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+  glui_treepanel.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_treepanel.cpp(211): warning C4305: 'argument': truncation from 'double' to 'float'
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_treepanel.cpp(212): warning C4305: 'argument': truncation from 'double' to 'float'
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_treepanel.cpp(213): warning C4305: 'argument': truncation from 'double' to 'float'
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_treepanel.cpp(214): warning C4305: 'argument': truncation from 'double' to 'float'
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_treepanel.cpp(215): warning C4305: 'argument': truncation from 'double' to 'float'
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_treepanel.cpp(216): warning C4305: 'argument': truncation from 'double' to 'float'
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\glui_treepanel.cpp(217): warning C4305: 'argument': truncation from 'double' to 'float'
+  glui_window.cpp
+o:\szie\research\wetpv\raytracercpp\lib_3rd\glui-2.36\src\include\gl\glui.h(881): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+  quaternion.cpp
+  Generating Code...
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(1397,5): warning MSB8012: TargetPath(O:\SZIE\research\WetPV\RayTracerCpp\lib_3rd\glui-2.36\src\msvc\x64\Release\_glui library.lib) does not match the Library's OutputFile property value (o:\SZIE\research\WetPV\RayTracerCpp\lib_3rd\glui-2.36\src\msvc\lib\glui32.lib). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Lib.OutputFile).
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(1399,5): warning MSB8012: TargetName(_glui library) does not match the Library's OutputFile property value (glui32). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Lib.OutputFile).
+  glui.vcxproj -> O:\SZIE\research\WetPV\RayTracerCpp\lib_3rd\glui-2.36\src\msvc\x64\Release\_glui library.lib
