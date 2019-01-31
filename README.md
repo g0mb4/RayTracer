@@ -1,6 +1,6 @@
 # RayTracer
 
-Light in a water drop.
+Simulation of a light ray passing through a water droplet.
 
 ## JS
 JavaScript solution, light "as a particle".
