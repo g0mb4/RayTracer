@@ -21,6 +21,9 @@
 #include "info.h"
 #include "collisionresponse.h"
 
+#include "camera.h"
+#include "color.h"
+
 #define DEL_PTR(x)	if(x) { delete x; };
 
 class RayTracerApp {
@@ -40,9 +43,9 @@ public:
 	void sim_reset(void);
 
 	bool is_init_ok(void) { return init_ok; };
-
 private:
 	void draw_axes(float s);
+	void render_image(void);
 
 	bool init_ok;
 
@@ -82,6 +85,8 @@ private:
 	int rays_per_width, rays_per_height;
 
 	int anim_delay;
+
+	int render_width, render_height;
 };
 
 

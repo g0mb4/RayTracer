@@ -82,7 +82,7 @@ void Info::_printText(int x, int y, const char* text) {
 	glRasterPos2i(x, y);
 
 	for (int i = 0; i < strlen(text); i++) {
-		glutBitmapCharacter(text[i]);
+		glutBitmapCharacterMod(text[i]);
 	}
 }
 

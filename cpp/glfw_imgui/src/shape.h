@@ -9,6 +9,7 @@
 
 #include "vectormath.h"
 #include "ray.h"
+#include "color.h"
 
 enum { T_NONE, T_SET, T_PLANE, T_SPHERE };
 
@@ -24,6 +25,7 @@ public:
 	virtual void draw(void) = 0;
 
 	int type;
+	Color color;
 };
 
 class ShapeSet : public Shape
@@ -47,17 +49,16 @@ public:
 class Plane : public Shape
 {
 public:
-	Point position;
-	Vector normal;
-
-public:
-	Plane(const Point& center, float size, const Vector& normal);
+	Plane(const Point& center, float size, const Vector& normal, const Color& color);
 
 	virtual ~Plane() {};
 
 	virtual bool intersect(Intersection& intersection);
 	virtual bool doesIntersect(const Ray& ray);
 	virtual void draw(void);
+
+	Point position;
+	Vector normal;
 
 private:
 	Vector _t, _b;
@@ -68,7 +69,7 @@ private:
 class Sphere : public Shape
 {
 public:
-	Sphere(const Point& centre, float radius, float reflection);
+	Sphere(const Point& centre, float radius, float reflection, const Color& color);
 
 	virtual ~Sphere(void) {};
 

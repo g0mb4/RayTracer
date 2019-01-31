@@ -25,14 +25,18 @@ project "RayTracer"
 		"lib_3rd/glew-2.1.0/include",
 		"lib_3rd/glfw-3.2.1/include",
 		"lib_3rd/imgui-1.67/include"
-		
 	}
+	
+	defines {
+		"GLEW_STATIC"
+	}	
+ 
 	
 	links
 	{
 		"opengl32.lib",
 		"glu32.lib",
-		"lib_3rd/glew-2.1.0/lib/Release/x64/glew32.lib",
+		"lib_3rd/glew-2.1.0/lib/Release/x64/glew32s.lib",
 		"lib_3rd/glfw-3.2.1/lib/glfw3.lib"
 	}
 	

@@ -19,8 +19,8 @@ RayTracerApp::RayTracerApp(int w, int h) {
 	info->AddVariable(10, 120, "s", "start sim");
 	info->AddVariable(10, 132, "r", "reset sim");
 
-	plane = new Plane(Point(0.0f, 0.0f, 0.0f), 1.0f, Vector(0.0f, 1.0f, 0.0f));
-	sphere = new Sphere(Point(0.0f, 1.0f, 0.0f), 1.0f, (4.0f / 3.0f));
+	plane = new Plane(Point(0.0f, 0.0f, 0.0f), 1.0f, Vector(0.0f, 1.0f, 0.0f), Color(0.0f, 1.0f, 0.0f));
+	sphere = new Sphere(Point(0.0f, 1.0f, 0.0f), 1.0f, (4.0f / 3.0f), Color(0.0f, 0.0f, 1.0f));
 
 	show_axes = false, show_objects = true;
 	add_sphere = true;
@@ -39,6 +39,8 @@ RayTracerApp::RayTracerApp(int w, int h) {
 	rays_per_width = 10, rays_per_height = 10;
 
 	anim_delay = 500;
+
+	render_width = 640, render_height = 480;
 
 	if (!glfwInit()) {
 		return;
@@ -79,7 +81,6 @@ RayTracerApp::RayTracerApp(int w, int h) {
 	ImGui_ImplGlfw_InitForOpenGL(control_window, true);
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
-	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls 
 	ImGui::GetIO().IniFilename = NULL;	// no ini file;
 
 	imgui_flags = 0;
@@ -89,9 +90,9 @@ RayTracerApp::RayTracerApp(int w, int h) {
 	imgui_flags |= ImGuiWindowFlags_NoMove;
 	imgui_flags |= ImGuiWindowFlags_NoResize;
 	imgui_flags |= ImGuiWindowFlags_NoCollapse;
-	imgui_flags |= ImGuiWindowFlags_NoNav;
-	imgui_flags |= ImGuiWindowFlags_NoBackground;
-	imgui_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+	//imgui_flags |= ImGuiWindowFlags_NoNav;
+	//imgui_flags |= ImGuiWindowFlags_NoBackground;
+	//imgui_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
 
 	sim_reset();
 
@@ -186,9 +187,29 @@ void RayTracerApp::sim_reset(void) {
 }
 
 void RayTracerApp::run(void) {
-	while (running && !glfwWindowShouldClose(sim_window))
-	{
+	int space_old = GLFW_RELEASE;
+	int space_new = GLFW_RELEASE;
+
+	while (running && !glfwWindowShouldClose(sim_window)){
 		glfwPollEvents();
+
+		if (glfwGetKey(sim_window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+			running = false;
+		}
+
+		space_new = glfwGetKey(sim_window, GLFW_KEY_SPACE);
+		if (space_new == GLFW_PRESS && space_old == GLFW_RELEASE) {
+			sim_step();
+		}
+		space_old = space_new;
+
+		if (glfwGetKey(sim_window, GLFW_KEY_S) == GLFW_PRESS) {
+			sim_start();
+		}
+
+		if (glfwGetKey(sim_window, GLFW_KEY_R) == GLFW_PRESS) {
+			sim_reset();
+		}
 
 		control_window_draw();
 
@@ -271,6 +292,14 @@ void RayTracerApp::control_window_draw(void) {
 		if (ImGui::CollapsingHeader("Visual")) {
 			ImGui::Checkbox("Show axes", &show_axes);
 			ImGui::Checkbox("Show objects", &show_objects);
+		}
+
+		if (ImGui::CollapsingHeader("Render")) {
+			ImGui::InputInt("Width", &render_width);
+			ImGui::InputInt("Height", &render_height);
+			if (ImGui::Button("Render Image")) {
+				render_image();
+			}
 		}
 		
 		ImGui::Separator();
@@ -367,4 +396,79 @@ void RayTracerApp::draw_axes(float s) {
 	glEnd();
 
 	glPopMatrix();
+}
+
+void RayTracerApp::render_image(void) {
+	char title[256];
+	sprintf_s(title, 256, "RayTracer - Rendered Image - %dx%d - rendering ...", render_width, render_height);
+
+	GLFWwindow * render_window = glfwCreateWindow(render_width, render_height, title, NULL, NULL);
+	if (!render_window) {
+		return;
+	}
+
+	glfwMakeContextCurrent(render_window);
+	glfwSetWindowPos(render_window, 100, 100);
+
+	std::vector<Color> image;
+
+	auto cosd = [](float a) {
+		return cos(a * (PI / 180.0f));
+	};
+
+	PerspectiveCamera camera(Point(start_pos_x, start_pos_y, start_pos_z), Vector(cosd(alpha), cosd(beta), cosd(gamma)), Vector(), 25.0f * PI / 180.0f, (float)render_width / (float)render_height);
+	Color * buf = new Color[render_width * render_height];
+
+	auto t1 = std::chrono::high_resolution_clock::now();
+	for (int x = 0; x < render_width; x++) {
+		for (int y = 0; y < render_height; y++) {
+			Vector2 screenCoord((2.0f * x) / render_width - 1.0f, (-2.0f * y) / render_height + 1.0f);
+			Ray ray = camera.makeRay(screenCoord);
+			Intersection intersection(ray);
+			Color c = Color(0.0f);
+
+			if (scene.intersect(intersection)) {
+				c = intersection.pShape->color;
+			}
+
+			buf[y * render_width + x] = c;
+		}
+	}
+
+	auto t2 = std::chrono::high_resolution_clock::now();
+	auto diff = t2 - t1;
+	auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(diff).count();
+
+	sprintf_s(title, 256, "RayTracer - Rendered Image - %dx%d - %llu ms", render_width, render_height, duration_ms);
+	glfwSetWindowTitle(render_window, title);
+
+	while (!glfwWindowShouldClose(render_window)) {
+		glfwPollEvents();
+
+		glfwMakeContextCurrent(render_window);
+
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		glLoadIdentity();
+		gluOrtho2D(0, render_width, render_height, 0);
+
+		glBegin(GL_POINTS);
+		for (int x = 0; x < render_width; x++) {
+			for (int y = 0; y < render_height; y++) {
+				Color * c = &buf[y * render_width + x];
+				glColor3f(c->r, c->g, c->b);
+				glVertex2i(x, y);
+				
+			}
+		}
+		glEnd();
+		glfwSwapBuffers(render_window);
+	}
+
+	delete[] buf;
+
+	if (render_window) {
+		glfwDestroyWindow(render_window);
+	}
 }

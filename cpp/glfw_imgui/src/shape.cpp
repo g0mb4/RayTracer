@@ -40,10 +40,11 @@ bool ShapeSet::doesIntersect(const Ray& ray)
 }
 
 
-Plane::Plane(const Point& position, float size, const Vector& normal)
+Plane::Plane(const Point& position, float size, const Vector& normal, const Color& c)
 	: position(position), normal(normal), _size(size)
 {
 	type = T_PLANE;
+	color = c;
 
 	/* TODO: 
 		_t = (position - p0).normalize();
@@ -110,7 +111,7 @@ bool Plane::doesIntersect(const Ray& ray)
 void Plane::draw(void) {
 	
 	glBegin(GL_LINES);
-		glColor3f(0.0f, 1.0f, 0.0f);
+		glColor3f(color.r, color.g, color.b);
 
 		glVertex3f(_p1.x, _p1.y, _p1.z);
 		glVertex3f(_p2.x, _p2.y, _p2.z);
@@ -127,10 +128,12 @@ void Plane::draw(void) {
 }
 
 
-Sphere::Sphere(const Point& centre, float radius, float reflection)
+Sphere::Sphere(const Point& centre, float radius, float reflection, const Color& c)
 	: centre(centre), radius(radius), reflection(reflection)
 {
 	type = T_SPHERE;
+	color = c;
+
 	quad = gluNewQuadric();
 }
 
@@ -212,7 +215,7 @@ bool Sphere::doesIntersect(const Ray& ray)
 
 void Sphere::draw(void) {
 	glPushMatrix();
-		glColor3f(0.0, 0.0, 1.0);
+		glColor3f(color.r, color.g, color.b);
 		glTranslatef(centre.x, centre.y, centre.z);
 		gluSphere(quad, radius, 20, 20);
 	glPopMatrix();

@@ -5,8 +5,8 @@
 
 // fg_internal.h 
 // line: 748
-typedef struct tagSFG_Font SFG_Font;
-struct tagSFG_Font
+typedef struct tagSFG_FontMod SFG_FontMod;
+struct tagSFG_FontMod
 {
 	int  Quantity;     /* Number of chars in font          */
 	int  Height;       /* Height of the characters         */
@@ -17,10 +17,10 @@ struct tagSFG_Font
 
 // fg_font.c
 // line: 99
-void glutBitmapCharacter(int character);
+void glutBitmapCharacterMod(int character);
 
 // fg_font.c
 // line: 133
-void glutBitmapString(const unsigned char * string);
+void glutBitmapStringMod(const unsigned char * string);
 
 #endif
