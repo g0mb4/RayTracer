@@ -5,6 +5,8 @@ Light in a water drop.
 ## JS
 JavaScript solution, light "as a particle".
 
+Using [p5js](https://p5js.org) and Evan Wallace's [vector.js](https://github.com/evanw/lightgl.js).
+
 ### Usage
 Run ```index.html```
 
