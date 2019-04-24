@@ -8,6 +8,9 @@ RayTracerApp::RayTracerApp(int w, int h) {
 
 	info = new Info(window_width, window_height);
 
+	center_y = 0.0f;
+	radius_y = 1.0f;
+
 	info->AddVariable(10, 12, "FPS", (void*)NULL);  // internal
 	info->AddVariable(10, 24, "MEM", (void*)NULL);	// internal
 	info->AddVariable(10, 48, "STEPS", &steps);
@@ -20,20 +23,24 @@ RayTracerApp::RayTracerApp(int w, int h) {
 	info->AddVariable(10, 132, "r", "reset sim");
 
 	plane = new Plane(Point(0.0f, 0.0f, 0.0f), 1.0f, Vector(0.0f, 1.0f, 0.0f), Color(0.0f, 1.0f, 0.0f));
-	sphere = new Sphere(Point(0.0f, 1.0f, 0.0f), 1.0f, (4.0f / 3.0f), Color(0.0f, 0.0f, 1.0f));
+	sphere = new Sphere(Point(0.0f, center_y, 0.0f), radius_y, (4.0f / 3.0f), Color(0.0f, 0.0f, 1.0f));
+	ellipsoid = new Ellipsoid(Point(0.0f, center_y, 0.0f), Point(1.0f, radius_y, 1.0f), (4.0f / 3.0f), Color(0.0f, 0.0f, 1.0f));
 
 	show_axes = false, show_objects = true;
 	add_sphere = true;
+	add_ellipsoid = true;
 
 	ray_group = 0;
-	start_pos_x = -2.0f, start_pos_y = 1, start_pos_z = 0.0f;
-	alpha = 0, beta = 90, gamma = 90;
+	start_pos_x = -2.0f, start_pos_y = 0.5f, start_pos_z = 0.0f;
+	alpha = 0;
+	beta = 160; //90;
+	gamma = 90;
 
 	steps = 0;
 	total_plane_collisions = 0;
 	no_rays = 0;
 
-	cam_x = 0, cam_y = 1, cam_z = 8;
+	cam_x = 0, cam_y = 0, cam_z = 8;
 
 	lamp_width = 1.9f, lamp_height = 2.0f;
 	rays_per_width = 10, rays_per_height = 10;
@@ -113,29 +120,43 @@ RayTracerApp::~RayTracerApp(void) {
 	DEL_PTR(info);
 	DEL_PTR(plane);
 	DEL_PTR(sphere);
+	DEL_PTR(ellipsoid);
 }
 
 void RayTracerApp::sim_step(void) {
+	std::vector<Ray> new_set;
+
 	for (auto &ray : rays) {
 		if (ray) {
 			Intersection intersection(*ray);
 			if (scene.intersect(intersection)) {
-				bool succ = false;
-				CollisionResponse c(intersection, ray.get(), &succ);
+				Ray reflected;
+				Ray refracted;
+
+				CollisionResponse c(intersection, ray.get(), &reflected, &refracted);
 				if (intersection.pShape->type == T_PLANE) {
 					total_plane_collisions++;
 				}
 
-				if (!succ) {
-					ray.release();
-					// rays.remove(ray); // TODO
+				if (reflected.valid) {
+					new_set.push_back(reflected);
 				}
+
+				if (refracted.valid) {
+					new_set.push_back(refracted);
+				}
+
+				ray.release();
 			}
 			else {
 				ray.release();
 				//rays.remove(ray); // TODO
 			}
 		}
+	}
+
+	for (auto &ray : new_set) {
+		rays.push_back(std::make_unique<Ray>(ray));
 	}
 
 	steps++;
@@ -168,7 +189,10 @@ void RayTracerApp::sim_reset(void) {
 		float start_z = start_pos_z - (lamp_height / 2.0f);
 		float end_z = start_pos_z + (lamp_height / 2.0f);
 
-		for (float y = start_y; y < end_y; y += d_y) {
+		for (float y = end_y; y > start_y; y -= d_y) {
+			if (y <= 0.0f) {
+				break;
+			}
 			for (float z = start_z; z < end_z; z += d_z) {
 				rays.push_back(std::make_unique<Ray>(Point(start_pos_x, y, z), Vector(cosd(alpha), cosd(beta), cosd(gamma))));
 			}
@@ -177,8 +201,11 @@ void RayTracerApp::sim_reset(void) {
 
 	scene.clear();
 	scene.addShape(plane);
-	if (add_sphere) {
-		scene.addShape(sphere);
+
+	if (add_ellipsoid) {
+		ellipsoid->centre.y = center_y;
+		ellipsoid->radius.y = radius_y;
+		scene.addShape(ellipsoid);
 	}
 
 	no_rays = (int)rays.size();
@@ -279,14 +306,17 @@ void RayTracerApp::control_window_draw(void) {
 			if (ray_group == 1) {
 				ImGui::Separator();
 				if (ImGui::InputFloat("Width of lamp", &lamp_width, 0.01f, 1.0f, "%.3f")) { sim_reset(); }
-				if (ImGui::InputFloat("Height of lamp", &lamp_width, 0.01f, 1.0f, "%.3f")) { sim_reset(); }
+				if (ImGui::InputFloat("Height of lamp", &lamp_height, 0.01f, 1.0f, "%.3f")) { sim_reset(); }
 				if (ImGui::InputInt("Rays per width", &rays_per_width)) { sim_reset(); }
 				if (ImGui::InputInt("Rays per height", &rays_per_height)) { sim_reset(); }
 			}
 		}
 
 		if (ImGui::CollapsingHeader("Object settings")) {
-			if(ImGui::Checkbox("Spheres", &add_sphere)) { sim_reset(); }
+			if(ImGui::Checkbox("Ellipsoid", &add_ellipsoid)) { sim_reset(); }
+			ImGui::Separator();
+			if (ImGui::InputFloat("Center Y", &center_y, 0.01f, 0.1f, "%.3f")) { sim_reset(); }
+			if (ImGui::InputFloat("Radius Y", &radius_y, 0.01f, 0.1f, "%.3f")) { sim_reset(); }
 		}
 
 		if (ImGui::CollapsingHeader("Visual")) {
@@ -409,6 +439,7 @@ void RayTracerApp::render_image(void) {
 
 	glfwMakeContextCurrent(render_window);
 	glfwSetWindowPos(render_window, 100, 100);
+	glfwSetWindowTitle(render_window, title);
 
 	std::vector<Color> image;
 

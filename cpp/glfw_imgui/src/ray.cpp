@@ -3,7 +3,9 @@
 Ray::Ray()
 	: origin(0.0f, 0.0f, 0.0f),
 	direction(),
-	tMax(RAY_T_MAX)
+	tMax(RAY_T_MAX),
+	energy(1.0f),
+	valid(true)
 {
 	history.push_back(origin);
 }
@@ -11,21 +13,24 @@ Ray::Ray()
 Ray::Ray(const Ray& r)
 	: origin(r.origin),
 	direction(r.direction),
-	tMax(r.tMax)
+	tMax(r.tMax),
+	energy(r.energy),
+	valid(true)
 {
-	history.push_back(r.origin);
+	history.clear();
+	for (unsigned int i = 0; i < r.history.size(); i++) {
+		history.push_back(r.history[i]);
+	}
 }
 
 Ray::Ray(const Point& origin, const Vector& direction, float tMax)
 	: origin(origin),
 	direction(direction),
-	tMax(tMax)
+	tMax(tMax),
+	energy(1.0f),
+	valid(true)
 {
 	history.push_back(origin);
-}
-
-Ray::~Ray()
-{
 }
 
 Ray& Ray::operator =(const Ray& r)
@@ -33,6 +38,14 @@ Ray& Ray::operator =(const Ray& r)
 	origin = r.origin;
 	direction = r.direction;
 	tMax = r.tMax;
+	energy = r.energy;
+	valid = r.valid;
+
+	history.clear();
+	for (unsigned int i = 0; i < r.history.size(); i++) {
+		history.push_back(r.history[i]);
+	}
+
 	return *this;
 }
 

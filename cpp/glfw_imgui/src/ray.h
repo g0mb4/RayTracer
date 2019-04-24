@@ -20,13 +20,14 @@ struct Ray
 	Point origin; // start
 	Vector direction;
 	float tMax;
+	bool valid;
+	float energy;
 
 	Ray();
 	Ray(const Ray& r);
-	Ray(const Point& origin, const Vector& direction,
-		float tMax = RAY_T_MAX);
+	Ray(const Point& origin, const Vector& direction, float tMax = RAY_T_MAX);
 
-	virtual ~Ray();
+	virtual ~Ray() {};
 
 	Ray& operator =(const Ray& r);
 

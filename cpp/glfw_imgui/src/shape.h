@@ -11,7 +11,7 @@
 #include "ray.h"
 #include "color.h"
 
-enum { T_NONE, T_SET, T_PLANE, T_SPHERE };
+enum { T_NONE, T_SET, T_PLANE, T_SPHERE, T_ELLIPSOID };
 
 class Shape
 {
@@ -71,7 +71,7 @@ class Sphere : public Shape
 public:
 	Sphere(const Point& centre, float radius, float reflection, const Color& color);
 
-	virtual ~Sphere(void) {};
+	virtual ~Sphere(void) { gluDeleteQuadric(quad); };
 
 	virtual bool intersect(Intersection& intersection);
 	virtual bool doesIntersect(const Ray& ray);
@@ -79,6 +79,24 @@ public:
 
 	Point centre;
 	float radius;
+	float reflection;
+
+	GLUquadric * quad;
+};
+
+class Ellipsoid : public Shape
+{
+public:
+	Ellipsoid(const Point& centre, const Point& radius, float reflection, const Color& color);
+
+	virtual ~Ellipsoid(void) { gluDeleteQuadric(quad); };
+
+	virtual bool intersect(Intersection& intersection);
+	virtual bool doesIntersect(const Ray& ray);
+	virtual void draw(void);
+
+	Point centre;
+	Point radius;
 	float reflection;
 
 	GLUquadric * quad;

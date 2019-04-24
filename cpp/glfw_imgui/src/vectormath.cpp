@@ -36,7 +36,7 @@ Vector::~Vector()
 
 float Vector::length2()
 {
-	return sqr(x) + sqr(y) + sqr(z);
+	return x*x + y*y + z*z;
 }
 
 float Vector::length()

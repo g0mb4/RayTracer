@@ -137,7 +137,6 @@ Sphere::Sphere(const Point& centre, float radius, float reflection, const Color&
 	quad = gluNewQuadric();
 }
 
-
 bool Sphere::intersect(Intersection& intersection)
 {
 	// Transform ray so we can consider origin-centred sphere
@@ -150,7 +149,7 @@ bool Sphere::intersect(Intersection& intersection)
 	float c = localRay.origin.length2() - sqr(radius);
 
 	// Check whether we intersect
-	float discriminant = sqr(b) - 4 * a * c;
+	float discriminant = b * b - 4 * a * c;
 
 	if (discriminant < 0.0f)
 	{
@@ -194,7 +193,7 @@ bool Sphere::doesIntersect(const Ray& ray)
 	float c = localRay.origin.length2() - sqr(radius);
 
 	// Check whether we intersect
-	float discriminant = sqr(b) - 4 * a * c;
+	float discriminant = b * b - 4 * a * c;
 
 	if (discriminant < 0.0f)
 	{
@@ -218,5 +217,116 @@ void Sphere::draw(void) {
 		glColor3f(color.r, color.g, color.b);
 		glTranslatef(centre.x, centre.y, centre.z);
 		gluSphere(quad, radius, 20, 20);
+	glPopMatrix();
+}
+
+Ellipsoid::Ellipsoid(const Point& centre, const Point& radius, float reflection, const Color& c)
+	: centre(centre), radius(radius), reflection(reflection)
+{
+	type = T_ELLIPSOID;
+	color = c;
+
+	quad = gluNewQuadric();
+}
+
+bool Ellipsoid::intersect(Intersection& intersection)
+{
+	// Transform ray so we can consider origin-centred sphere
+	Ray localRay = intersection.ray;
+	localRay.origin -= centre;
+
+	// Calculate quadratic coefficients
+	float a = ((localRay.direction.x * localRay.direction.x) / (radius.x * radius.x))
+			+ ((localRay.direction.y * localRay.direction.y) / (radius.y * radius.y))
+			+ ((localRay.direction.z * localRay.direction.z) / (radius.z * radius.z));
+
+	float b = ((2 * localRay.origin.x * localRay.direction.x) / (radius.x * radius.x))
+			+ ((2 * localRay.origin.y * localRay.direction.y) / (radius.y * radius.y))
+			+ ((2 * localRay.origin.z * localRay.direction.z) / (radius.z * radius.z));
+
+	float c = ((localRay.origin.x * localRay.origin.x) / (radius.x * radius.x))
+			+ ((localRay.origin.y * localRay.origin.y) / (radius.y * radius.y))
+			+ ((localRay.origin.z * localRay.origin.z) / (radius.z * radius.z))
+			- 1;
+
+	// Check whether we intersect
+	float discriminant = b * b - 4 * a * c;
+
+	if (discriminant < 0.0f)
+	{
+		return false;
+	}
+
+	// Find two points of intersection, t1 close and t2 far
+	float t1 = (-b - std::sqrt(discriminant)) / (2 * a);
+	float t2 = (-b + std::sqrt(discriminant)) / (2 * a);
+
+	// First check if close intersection is valid
+	if (t1 > RAY_T_MIN && t1 < intersection.t)
+	{
+		intersection.t = t1;
+	}
+	else if (t2 > RAY_T_MIN && t2 < intersection.t)
+	{
+		intersection.t = t2;
+	}
+	else
+	{
+		// Neither is valid
+		return false;
+	}
+
+	// Finish populating intersection
+	intersection.pShape = this;
+
+	return true;
+}
+
+bool Ellipsoid::doesIntersect(const Ray& ray)
+{
+	// Transform ray so we can consider origin-centred sphere
+	Ray localRay = ray;
+	localRay.origin -= centre;
+
+	// Calculate quadratic coefficients
+	float a = ((localRay.direction.x * localRay.direction.x) / (radius.x * radius.x))
+			+ ((localRay.direction.y * localRay.direction.y) / (radius.y * radius.y))
+			+ ((localRay.direction.z * localRay.direction.z) / (radius.z * radius.z));
+
+	float b = ((2 * localRay.origin.x * localRay.direction.x) / (radius.x * radius.x))
+			+ ((2 * localRay.origin.y * localRay.direction.y) / (radius.y * radius.y))
+			+ ((2 * localRay.origin.z * localRay.direction.z) / (radius.z * radius.z));
+
+	float c = ((localRay.origin.x * localRay.origin.x) / (radius.x * radius.x))
+			+ ((localRay.origin.y * localRay.origin.y) / (radius.y * radius.y))
+			+ ((localRay.origin.z * localRay.origin.z) / (radius.z * radius.z))
+			- 1;
+
+	// Check whether we intersect
+	float discriminant = b * b - 4 * a * c;
+
+	if (discriminant < 0.0f)
+	{
+		return false;
+	}
+
+	// Find two points of intersection, t1 close and t2 far
+	float t1 = (-b - std::sqrt(discriminant)) / (2 * a);
+	if (t1 > RAY_T_MIN && t1 < ray.tMax)
+		return true;
+
+	float t2 = (-b + std::sqrt(discriminant)) / (2 * a);
+	if (t2 > RAY_T_MIN && t2 < ray.tMax)
+		return true;
+
+	return false;
+}
+
+void Ellipsoid::draw(void) {
+	glPushMatrix();
+	glColor3f(color.r, color.g, color.b);
+	glTranslatef(centre.x, centre.y, centre.z);
+	glScalef(radius.x, radius.y, radius.z);
+	gluSphere(quad, 1.0, 20, 20);
 	glPopMatrix();
 }

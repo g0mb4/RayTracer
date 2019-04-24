@@ -66,9 +66,10 @@ private:
 	ShapeSet scene;
 	Plane * plane; // (Point(0.0f, 0.0f, 0.0f), 1.0f, Vector(0.0f, 1.0f, 0.0f));
 	Sphere * sphere; // (Point(0.0f, 1.0f, 0.0f), 1.0f, (4.0f / 3.0f));
+	Ellipsoid * ellipsoid;
 
 	bool show_axes, show_objects;
-	bool add_sphere;
+	bool add_sphere, add_ellipsoid;
 
 	int ray_group;
 	int fps;
@@ -87,8 +88,7 @@ private:
 	int anim_delay;
 
 	int render_width, render_height;
+	float center_y, radius_y;
 };
-
-
 
 #endif
