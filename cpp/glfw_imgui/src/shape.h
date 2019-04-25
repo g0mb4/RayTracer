@@ -49,7 +49,7 @@ public:
 class Plane : public Shape
 {
 public:
-	Plane(const Point& center, float size, const Vector& normal, const Color& color);
+	Plane(const Point& center, float size, const Vector& normal, float reflection, const Color& color);
 
 	virtual ~Plane() {};
 
@@ -59,6 +59,7 @@ public:
 
 	Point position;
 	Vector normal;
+	float reflection;
 
 private:
 	Vector _t, _b;
@@ -98,6 +99,8 @@ public:
 	Point centre;
 	Point radius;
 	float reflection;
+
+	bool isInside(const Point p);
 
 	GLUquadric * quad;
 };

@@ -17,20 +17,20 @@ void Info::Refresh(void) {
 		if (i.name == "MEM") {
 			si_getUsedMemory(buf, 256);
 		} else if (i.name == "FPS") {
-			sprintf_s(buf, 256, "%s: %.0f", i.name.c_str(), (1000.0f/(float)duration_ms));
+			snprintf(buf, 256, "%s: %.0f", i.name.c_str(), (1000.0f/(float)duration_ms));
 		}
 		else {
 			switch (i.type) {
 			case PT_INT:
-				sprintf_s(buf, 256, "%s: %d", i.name.c_str(), *(int*)i.ptr);
+				snprintf(buf, 256, "%s: %d", i.name.c_str(), *(int*)i.ptr);
 				break;
 
 			case PT_FLOAT:
-				sprintf_s(buf, 256, "%s: %.2f", i.name.c_str(), *(float*)i.ptr);
+				snprintf(buf, 256, "%s: %.4f", i.name.c_str(), *(float*)i.ptr);
 				break;
 
 			case PT_STRING:
-				sprintf_s(buf, 256, "%s: %s", i.name.c_str(), (char*)i.ptr);
+				snprintf(buf, 256, "%s: %s", i.name.c_str(), (char*)i.ptr);
 				break;
 			}
 		}

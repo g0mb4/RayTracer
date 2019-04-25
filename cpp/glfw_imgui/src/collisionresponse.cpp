@@ -1,12 +1,9 @@
 #include "collisionresponse.h"
 
-CollisionResponse::CollisionResponse(const Intersection & intersection, Ray * ray, Ray * reflected, Ray * refracted){
+CollisionResponse::CollisionResponse(Intersection & intersection, Ray * ray, Ray * reflected, Ray * refracted){
 	switch (intersection.pShape->type) {
 	case T_PLANE :
 		planeCollision((Plane*)intersection.pShape, intersection.position(), ray, reflected, refracted);
-		break;
-	case T_SPHERE:
-		sphereCollision((Sphere*)intersection.pShape, intersection.position(), ray, reflected, refracted);
 		break;
 	case T_ELLIPSOID:
 		ellipsoidCollision((Ellipsoid*)intersection.pShape, intersection.position(), ray, reflected, refracted);
@@ -18,39 +15,24 @@ CollisionResponse::CollisionResponse(const Intersection & intersection, Ray * ra
 Ray CollisionResponse::reflect(const Ray * r, const Point& c, const Vector& normal) {
 	Ray ret = *r;
 
-	ret.direction = r->direction - (2.0f * dot(r->direction, normal)) * normal;
+	ret.direction = (r->direction - (2.0f * dot(r->direction, normal)) * normal).normal();
 	ret.addPoint(c);
 
 	return ret;
 }
 
-
-void CollisionResponse::planeCollision(const Plane * p, Point c, Ray * ray, Ray * reflected, Ray * refracted) {
-	printf("plane collision at (%f, %f, %f)\n", c.x, c.y, c.z);
-
-	*reflected = reflect(ray, c, p->normal);
-	*refracted = *ray;
-
-	refracted->valid = false;
-}
-
-// only refraction!!!
 // http://cosinekitty.com/raytrace/chapter09_refraction.html
-void CollisionResponse::sphereCollision(const Sphere * s, Point c, Ray * ray, Ray * reflected, Ray * refracted) {
-	printf("sphere collision at (%f, %f, %f)\n", c.x, c.y, c.z);
-
-	auto distance = [](Point a, Point b) {
-		return sqrtf((a.x - b.x) * (a.x - b.x) + 
-			         (a.y - b.y) * (a.y - b.y) +
-			         (a.z - b.z) * (a.z - b.z));
-	};
+Ray CollisionResponse::refract(const Ray * r, const Point& c, const Vector& normal, float n1, float n2) {
+	Ray ret = *r;
+	ret.valid = false;
 
 	auto solveQuadratic = [](float a, float b, float c, float * res) {
 		float D = (b * b) - 4 * a * c;
 
 		if (D < 0) {
 			return false;
-		} else {
+		}
+		else {
 			res[0] = (-b + sqrtf(D)) / (2 * a);
 			res[1] = (-b - sqrtf(D)) / (2 * a);
 
@@ -58,20 +40,7 @@ void CollisionResponse::sphereCollision(const Sphere * s, Point c, Ray * ray, Ra
 		}
 	};
 
-	float n1 = 1;
-	float n2 = 1;
-
-	// from outside
-	if (distance(ray->origin, s->centre) > s->radius) {
-		n1 = 1.0f;				// air
-		n2 = s->reflection;
-	} else {
-		n1 = s->reflection;
-		n2 = 1.0f;
-	}
-
-	Vector normal = (s->centre - c).normal();
-	float cos_a1 = dot(ray->direction, normal);
+	float cos_a1 = dot(r->direction, normal);
 	float sin_a1 = 0;
 
 	if (cos_a1 <= -1.0f) {
@@ -81,8 +50,7 @@ void CollisionResponse::sphereCollision(const Sphere * s, Point c, Ray * ray, Ra
 	else if (cos_a1 >= +1.0f) {
 		cos_a1 = +1.0f;  // clamp to upper limit
 		sin_a1 = 0.0f;
-	}
-	else {
+	} else {
 		sin_a1 = sqrtf(1.0f - cos_a1 * cos_a1);
 	}
 
@@ -94,23 +62,18 @@ void CollisionResponse::sphereCollision(const Sphere * s, Point c, Ray * ray, Ra
 		// there is no such real angle a2, which in turn
 		// means that the ray experiences total internal reflection,
 		// so that no refracted ray exists.
-
-		ray->direction = ray->direction - (2.0f * dot(ray->direction, normal)) * normal;
-		ray->addPoint(c);
-		return;
-	}
-	else {
+	} else {
 		float res[2];
 
 		if (!solveQuadratic(1.0f, 2.0f * cos_a1, 1.0f - (1.0f / (n_ratio*n_ratio)), res)) {
-			return;
+			return ret;
 		}
 
-		float max_alignment = -0.0001f;
+		float max_alignment = -1.0f;
 		Vector refract_dir;
-		for(int k = 0; k < 2; k++) {
-			Vector refract_attempt = ray->direction + normal * res[k];
-			float alignment = dot(ray->direction, refract_attempt);
+		for (int k = 0; k < 2; k++) {
+			Vector refract_attempt = r->direction + normal * res[k];
+			float alignment = dot(r->direction, refract_attempt);
 			if (alignment > max_alignment) {
 				max_alignment = alignment;
 				refract_dir = refract_attempt;
@@ -122,16 +85,71 @@ void CollisionResponse::sphereCollision(const Sphere * s, Point c, Ray * ray, Ra
 			// Either there were no solutions to the quadratic equation,
 			// or all solutions caused the refracted ray to bend 90 degrees
 			// or more, which is not possible.
-			return;
+		} else {
+			ret.direction = refract_dir.normal(); // TODO: normal() ???
+			ret.addPoint(c);
+			ret.valid = true;
+
+			// Determine the cosine of the exit angle.
+			double cos_a2 = sqrt(1.0 - sin_a2 * sin_a2);
+			if (cos_a1 < 0.0)
+			{
+				// Tricky bit: the polarity of cos_a2 must
+				// match that of cos_a1.
+				cos_a2 = -cos_a2;
+			}
+
+			// Determine what fraction of the light is
+			// reflected at the interface.  The caller
+			// needs to know this for calculating total
+			// reflection, so it is saved in an output parameter.
+
+			// We assume uniform polarization of light,
+			// and therefore average the contributions of s-polarized
+			// and p-polarized light.
+			double Rs = polarizedReflection(n1, n2, cos_a1, cos_a2);
+			double Rp = polarizedReflection(n1, n2, cos_a2, cos_a1);
+			double reflectionFactor = (Rs + Rp) / 2.0;
+
+			ret.energy = (1.0 - reflectionFactor) * ret.energy;
 		}
-		else {
-			ray->direction = refract_dir;
-			ray->addPoint(c);
-		}
+	}
+
+	return ret;
+}
+
+double CollisionResponse::polarizedReflection(double n1, double n2, double cos_a1, double cos_a2) {
+	double left = n1 * cos_a1;
+	double right = n2 * cos_a2;
+	double numer = left - right;
+	double denom = left + right;
+	denom *= denom;     // square the denominator
+	if (denom < 0.000001)
+	{
+		// Assume complete reflection.
+		return 1.0;
+	}
+	double reflection = (numer*numer) / denom;
+	if (reflection > 1.0)
+	{
+		// Clamp to actual upper limit.
+		return 1.0;
+	}
+	return reflection;
+}
+
+void CollisionResponse::planeCollision(Plane * p, Point c, Ray * ray, Ray * reflected, Ray * refracted) {
+	printf("plane collision at (%f, %f, %f)\n", c.x, c.y, c.z);
+
+	*reflected = reflect(ray, c, p->normal);
+	*refracted = refract(ray, c, p->normal, 1.0, p->reflection);
+
+	if (refracted->valid) {
+		reflected->energy -= refracted->energy;
 	}
 }
 
-void CollisionResponse::ellipsoidCollision(const Ellipsoid * s, Point c, Ray * ray, Ray * reflected, Ray * refracted) {
+void CollisionResponse::ellipsoidCollision(Ellipsoid * s, Point c, Ray * ray, Ray * reflected, Ray * refracted) {
 	printf("ellipsoid collision at (%f, %f, %f)\n", c.x, c.y, c.z);
 
 	auto distance = [](Point a, Point b) {
@@ -140,95 +158,25 @@ void CollisionResponse::ellipsoidCollision(const Ellipsoid * s, Point c, Ray * r
 			(a.z - b.z) * (a.z - b.z));
 	};
 
-	auto solveQuadratic = [](float a, float b, float c, float * res) {
-		float D = (b * b) - 4 * a * c;
-
-		if (D < 0) {
-			return false;
-		}
-		else {
-			res[0] = (-b + sqrtf(D)) / (2 * a);
-			res[1] = (-b - sqrtf(D)) / (2 * a);
-
-			return true;
-		}
-	};
-
 
 	float n1 = 1;
 	float n2 = 1;
 
-	// TODO: from outside
-	if (distance(ray->origin, s->centre) > distance(Point(0, 0, 0), s->radius)) {
-		n1 = 1.0f;				// air
-		n2 = s->reflection;
-	}
-	else {
+	if (s->isInside(ray->origin)) {
 		n1 = s->reflection;
 		n2 = 1.0f;
+	} else {
+		n1 = 1.0f;
+		n2 = s->reflection;
 	}
 
 	Vector normal = (s->centre - c).normal();
 
 	*reflected = reflect(ray, c, normal);
-	*refracted = *ray;
+	*refracted = refract(ray, c, normal, n1, n2);
 
-	refracted->valid = false;
-
-	float cos_a1 = dot(ray->direction, normal);
-	float sin_a1 = 0;
-
-	if (cos_a1 <= -1.0f) {
-		cos_a1 = -1.0f;  // clamp to lower limit
-		sin_a1 = 0.0f;
-	}
-	else if (cos_a1 >= +1.0f) {
-		cos_a1 = +1.0f;  // clamp to upper limit
-		sin_a1 = 0.0f;
-	}
-	else {
-		sin_a1 = sqrtf(1.0f - cos_a1 * cos_a1);
-	}
-
-	float n_ratio = n1 / n2;
-	float sin_a2 = n_ratio * sin_a1;
-
-	if (sin_a2 <= -1.0f || sin_a2 >= +1.0f) {
-		// Since sin_a2 is outside the bounds -1..+1, then
-		// there is no such real angle a2, which in turn
-		// means that the ray experiences total internal reflection,
-		// so that no refracted ray exists.
-		return;
-	}
-	else {
-		float res[2];
-
-		if (!solveQuadratic(1.0f, 2.0f * cos_a1, 1.0f - (1.0f / (n_ratio*n_ratio)), res)) {
-			return;
-		}
-
-		float max_alignment = -0.0001f;
-		Vector refract_dir;
-		for (int k = 0; k < 2; k++) {
-			Vector refract_attempt = ray->direction + normal * res[k];
-			float alignment = dot(ray->direction, refract_attempt);
-			if (alignment > max_alignment) {
-				max_alignment = alignment;
-				refract_dir = refract_attempt;
-			}
-		}
-
-		if (max_alignment <= 0.0f) {
-			// Getting here means there is something wrong with the math.
-			// Either there were no solutions to the quadratic equation,
-			// or all solutions caused the refracted ray to bend 90 degrees
-			// or more, which is not possible.
-		}
-		else {
-			refracted->valid = true;
-			refracted->direction = refract_dir;
-			refracted->addPoint(c);
-		}
+	if (refracted->valid) {
+		reflected->energy -= refracted->energy;
 	}
 }
 

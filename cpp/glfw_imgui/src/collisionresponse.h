@@ -8,15 +8,17 @@
 class CollisionResponse
 {
 public:
-	CollisionResponse(const Intersection & intersection, Ray * ray, Ray * reflected, Ray * refracted);
+	CollisionResponse(Intersection & intersection, Ray * ray, Ray * reflected, Ray * refracted);
 	virtual ~CollisionResponse() {};
 
 private:
-	void planeCollision(const Plane * p, Point c, Ray * ray, Ray * reflected, Ray * refracted);
-	void sphereCollision(const Sphere * s, Point c, Ray * ray, Ray * reflected, Ray * refracted);
-	void ellipsoidCollision(const Ellipsoid * s, Point c, Ray * ray, Ray * reflected, Ray * refracted);
+	void planeCollision(Plane * p, Point c, Ray * ray, Ray * reflected, Ray * refracted);
+	void ellipsoidCollision(Ellipsoid * s, Point c, Ray * ray, Ray * reflected, Ray * refracted);
 
 	Ray reflect(const Ray * r, const Point& c, const Vector& normal);
+	Ray refract(const Ray * r, const Point& c, const Vector& normal, float n1, float n2);
+
+	double polarizedReflection(double n1, double n2, double cos_a1, double cos_a2);
 };
 
 #endif

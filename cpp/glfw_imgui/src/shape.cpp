@@ -6,6 +6,13 @@ void ShapeSet::addShape(Shape* shape)
 }
 
 void ShapeSet::clear(void) {
+	// TODO:
+	/*for (int i = 0; i < shapes.size(); i++) {
+		if (shapes[i]) {
+			delete shapes[i];
+		}
+	}*/
+
 	shapes.clear();
 }
 
@@ -40,8 +47,8 @@ bool ShapeSet::doesIntersect(const Ray& ray)
 }
 
 
-Plane::Plane(const Point& position, float size, const Vector& normal, const Color& c)
-	: position(position), normal(normal), _size(size)
+Plane::Plane(const Point& position, float size, const Vector& normal, float reflection, const Color& c)
+	: position(position), normal(normal), _size(size), reflection(reflection)
 {
 	type = T_PLANE;
 	color = c;
@@ -329,4 +336,12 @@ void Ellipsoid::draw(void) {
 	glScalef(radius.x, radius.y, radius.z);
 	gluSphere(quad, 1.0, 20, 20);
 	glPopMatrix();
+}
+
+bool Ellipsoid::isInside(const Point p) {
+	float a = ((p.x - centre.x) / radius.x) * ((p.x - centre.x) / radius.x);
+	float b = ((p.y - centre.y) / radius.y) * ((p.y - centre.y) / radius.y);
+	float c = ((p.z - centre.z) / radius.z) * ((p.z - centre.z) / radius.z);
+
+	return (a + b + c) < 1.0f;
 }

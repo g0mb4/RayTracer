@@ -56,7 +56,7 @@ private:
 	GLFWwindow * sim_window;
 	GLFWwindow * control_window;
 
-	const int CONTROL_WIN_WIDTH = 350;
+	const int CONTROL_WIN_WIDTH = 380;
 
 	ImGuiWindowFlags imgui_flags;
 
@@ -78,6 +78,7 @@ private:
 
 	int steps;
 	int total_plane_collisions;
+	float total_plane_energy;
 	int no_rays;
  
 	float cam_x, cam_y, cam_z;
@@ -88,7 +89,12 @@ private:
 	int anim_delay;
 
 	int render_width, render_height;
-	float center_y, radius_y;
+	float center_y;
+	float radius_x, radius_y, radius_z;
+
+	int grid_x, grid_z;
+
+	float energy_threshold;
 };
 
 #endif
