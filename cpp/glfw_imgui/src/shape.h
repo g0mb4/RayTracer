@@ -11,7 +11,7 @@
 #include "ray.h"
 #include "color.h"
 
-enum { T_NONE, T_SET, T_PLANE, T_SPHERE, T_ELLIPSOID };
+enum { T_NONE, T_SET, T_PLANE, T_SPHERE, T_ELLIPSOID, T_CUBE };
 
 class Shape
 {
@@ -103,6 +103,21 @@ public:
 	bool isInside(const Point p);
 
 	GLUquadric * quad;
+};
+
+class Cube : public Shape
+{
+public:
+	Cube(const Point& centre, float sideLength, const Color& color);
+
+	virtual ~Cube(void) { };
+
+	virtual bool intersect(Intersection& intersection) { return false; };
+	virtual bool doesIntersect(const Ray& ray) { return false; };
+	virtual void draw(void);
+
+	Point centre;
+	float halfSideLength;
 };
 
 #endif // SHAPE_H

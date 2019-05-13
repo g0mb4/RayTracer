@@ -220,6 +220,7 @@ bool Sphere::doesIntersect(const Ray& ray)
 }
 
 void Sphere::draw(void) {
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	// for wireframed
 	glPushMatrix();
 		glColor3f(color.r, color.g, color.b);
 		glTranslatef(centre.x, centre.y, centre.z);
@@ -330,11 +331,12 @@ bool Ellipsoid::doesIntersect(const Ray& ray)
 }
 
 void Ellipsoid::draw(void) {
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	// for wireframed
 	glPushMatrix();
-	glColor3f(color.r, color.g, color.b);
-	glTranslatef(centre.x, centre.y, centre.z);
-	glScalef(radius.x, radius.y, radius.z);
-	gluSphere(quad, 1.0, 20, 20);
+		glColor3f(color.r, color.g, color.b);
+		glTranslatef(centre.x, centre.y, centre.z);
+		glScalef(radius.x, radius.y, radius.z);
+		gluSphere(quad, 1.0, 20, 20);
 	glPopMatrix();
 }
 
@@ -344,4 +346,58 @@ bool Ellipsoid::isInside(const Point p) {
 	float c = ((p.z - centre.z) / radius.z) * ((p.z - centre.z) / radius.z);
 
 	return (a + b + c) < 1.0f;
+}
+
+Cube::Cube(const Point& centre, float sideLength, const Color& c)
+	: centre(centre)
+{
+	type = T_CUBE;
+
+	halfSideLength = sideLength / 2.0f;
+	color = c;
+}
+
+void Cube::draw(void) {
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	// for filled
+
+	glBegin(GL_QUADS);
+	glColor3f(color.r, color.g, color.b);
+
+	// front face
+	glVertex3f(centre.x - halfSideLength, centre.y + halfSideLength, centre.z + halfSideLength); // top left
+	glVertex3f(centre.x + halfSideLength, centre.y + halfSideLength, centre.z + halfSideLength); // top right
+	glVertex3f(centre.x + halfSideLength, centre.y - halfSideLength, centre.z + halfSideLength); // bottom right
+	glVertex3f(centre.x - halfSideLength, centre.y - halfSideLength, centre.z + halfSideLength); // bottom left
+
+	// back face                                                                                    
+	glVertex3f(centre.x - halfSideLength, centre.y + halfSideLength, centre.z - halfSideLength); // top left
+	glVertex3f(centre.x + halfSideLength, centre.y + halfSideLength, centre.z - halfSideLength); // top right
+	glVertex3f(centre.x + halfSideLength, centre.y - halfSideLength, centre.z - halfSideLength); // bottom right
+	glVertex3f(centre.x - halfSideLength, centre.y - halfSideLength, centre.z - halfSideLength); // bottom left
+
+	// left face                                                                                    
+	glVertex3f(centre.x - halfSideLength, centre.y + halfSideLength, centre.z + halfSideLength); // top left
+	glVertex3f(centre.x - halfSideLength, centre.y + halfSideLength, centre.z - halfSideLength); // top right
+	glVertex3f(centre.x - halfSideLength, centre.y - halfSideLength, centre.z - halfSideLength); // bottom right
+	glVertex3f(centre.x - halfSideLength, centre.y - halfSideLength, centre.z + halfSideLength); // bottom left
+
+	// right face                                                                                   
+	glVertex3f(centre.x + halfSideLength, centre.y + halfSideLength, centre.z + halfSideLength); // top left
+	glVertex3f(centre.x + halfSideLength, centre.y + halfSideLength, centre.z - halfSideLength); // top right
+	glVertex3f(centre.x + halfSideLength, centre.y - halfSideLength, centre.z - halfSideLength); // bottom right
+	glVertex3f(centre.x + halfSideLength, centre.y - halfSideLength, centre.z + halfSideLength); // bottom left
+
+	// top face                                                                                     
+	glVertex3f(centre.x - halfSideLength, centre.y + halfSideLength, centre.z + halfSideLength); // top left
+	glVertex3f(centre.x - halfSideLength, centre.y + halfSideLength, centre.z - halfSideLength); // top right
+	glVertex3f(centre.x + halfSideLength, centre.y + halfSideLength, centre.z - halfSideLength); // bottom right
+	glVertex3f(centre.x + halfSideLength, centre.y + halfSideLength, centre.z + halfSideLength); // bottom left
+
+	// top face                                                                                     
+	glVertex3f(centre.x - halfSideLength, centre.y - halfSideLength, centre.z + halfSideLength); // top left
+	glVertex3f(centre.x - halfSideLength, centre.y - halfSideLength, centre.z - halfSideLength); // top right
+	glVertex3f(centre.x + halfSideLength, centre.y - halfSideLength, centre.z - halfSideLength); // bottom right
+	glVertex3f(centre.x + halfSideLength, centre.y - halfSideLength, centre.z + halfSideLength); // bottom left
+
+	glEnd();
 }

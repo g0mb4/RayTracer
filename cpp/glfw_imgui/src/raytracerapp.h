@@ -46,6 +46,8 @@ public:
 private:
 	void draw_axes(float s);
 	void render_image(void);
+	float max_2(float a, float b);
+	float max_3(float a, float b, float c);
 
 	bool init_ok;
 
@@ -67,8 +69,9 @@ private:
 	Plane * plane; // (Point(0.0f, 0.0f, 0.0f), 1.0f, Vector(0.0f, 1.0f, 0.0f));
 	Sphere * sphere; // (Point(0.0f, 1.0f, 0.0f), 1.0f, (4.0f / 3.0f));
 	Ellipsoid * ellipsoid;
+	Cube * cube;
 
-	bool show_axes, show_objects;
+	bool show_axes, show_objects, hider_cube;
 	bool add_sphere, add_ellipsoid;
 
 	int ray_group;

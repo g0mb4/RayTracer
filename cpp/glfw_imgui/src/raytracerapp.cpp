@@ -23,11 +23,13 @@ RayTracerApp::RayTracerApp(int w, int h) {
 	info->AddVariable(10, 168, "1", "side cam");
 	info->AddVariable(10, 180, "2", "top cam");
 
-	plane = new Plane(Point(0.0f, 0.0f, 0.0f), 1.0f, Vector(0.0f, 1.0f, 0.0f), (4.0f / 3.0f), Color(0.0f, 1.0f, 0.0f));
+	plane = new Plane(Point(0.0f, 0.001f, 0.0f), 1.0f, Vector(0.0f, 1.0f, 0.0f), (4.0f / 3.0f), Color(0.0f, 1.0f, 0.0f));
 	sphere = new Sphere(Point(0.0f, center_y, 0.0f), radius_y, (4.0f / 3.0f), Color(0.0f, 0.0f, 1.0f));
 	ellipsoid = new Ellipsoid(Point(0.0f, center_y, 0.0f), Point(1.0f, radius_y, 1.0f), (4.0f / 3.0f), Color(0.0f, 0.0f, 1.0f));
+	cube = new Cube(Point(0.0f, -1.0f, 0.0f), 2.0f, Color(0.0f, 0.0f, 0.0f));
 
 	show_axes = false, show_objects = true;
+	hider_cube = true;
 	add_sphere = true;
 	add_ellipsoid = true;
 
@@ -75,8 +77,6 @@ RayTracerApp::RayTracerApp(int w, int h) {
 
 	glfwMakeContextCurrent(sim_window);
 	glfwSetWindowPos(sim_window, 100, 100);
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	// for wireframed sphere
 
 	control_window = glfwCreateWindow(CONTROL_WIN_WIDTH, window_height, "RayTracer - Control", NULL, NULL);
 	if (!control_window) {
@@ -131,6 +131,7 @@ RayTracerApp::~RayTracerApp(void) {
 	DEL_PTR(plane);
 	DEL_PTR(sphere);
 	DEL_PTR(ellipsoid);
+	DEL_PTR(cube);
 }
 
 void RayTracerApp::sim_step(void) {
@@ -197,6 +198,20 @@ void RayTracerApp::sim_start(void) {
 	}
 }
 
+float RayTracerApp::max_2(float a, float b) {
+	return a > b ? a : b;
+}
+
+float RayTracerApp::max_3(float n1, float n2, float n3) {
+	if (n1 > n2 && n1 > n3){
+		return n1;
+	} else if (n2 > n1 && n2 > n3){
+		return n2;
+	} else {
+		return n3;
+	}
+}
+
 void RayTracerApp::sim_reset(void) {
 	auto cosd = [](float a) {
 		return cos(a * (PI / 180.0f));
@@ -227,8 +242,8 @@ void RayTracerApp::sim_reset(void) {
 	}
 
 	scene.clear();
-	scene.addShape(plane);
 
+	scene.addShape(plane);
 	if (add_ellipsoid) {
 		for (int i = 0; i < grid_x; i++) {
 			for (int j = 0; j < grid_z; j++) {
@@ -239,6 +254,13 @@ void RayTracerApp::sim_reset(void) {
 			}
 		}
 	}
+
+	float hsl = max_3(radius_x, radius_y, radius_z) * max_2(grid_x, grid_z) * 2;
+
+	cube->halfSideLength = hsl;
+	cube->centre.y = -hsl;
+
+	scene.addShape(cube);
 	
 	no_rays = (int)rays.size();
 	steps = 0;
@@ -299,7 +321,13 @@ void RayTracerApp::sim_window_draw(void) {
 
 	if (show_objects) {
 		for (auto s : scene.shapes) {
-			s->draw();
+			if (s->type == T_CUBE) {
+				if (hider_cube) {
+					s->draw();
+				}
+			} else {
+				s->draw();
+			}
 		}
 	}
 
@@ -367,6 +395,7 @@ void RayTracerApp::control_window_draw(void) {
 		if (ImGui::CollapsingHeader("View")) {
 			ImGui::Checkbox("Show axes (red: X, green: Y, blue: Z)", &show_axes);
 			ImGui::Checkbox("Show objects", &show_objects);
+			ImGui::Checkbox("Hider cube", &hider_cube);
 			ImGui::InputFloat("Cam X", &cam_x, 0.01f, 0.1f, "%.3f");
 			ImGui::InputFloat("Cam Y", &cam_y, 0.01f, 0.1f, "%.3f");
 			ImGui::InputFloat("Cam Z", &cam_z, 0.01f, 0.1f, "%.3f");
