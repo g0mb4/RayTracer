@@ -1,12 +1,12 @@
 #include "collisionresponse.h"
 
-CollisionResponse::CollisionResponse(Intersection & intersection, Ray * ray, Ray * reflected, Ray * refracted){
+CollisionResponse::CollisionResponse(Intersection & intersection, Ray * ray, float refl_index_medium, ShapeSet * scene, Ray * reflected, Ray * refracted){
 	switch (intersection.pShape->type) {
 	case T_PLANE :
-		planeCollision((Plane*)intersection.pShape, intersection.position(), ray, reflected, refracted);
+		planeCollision((Plane*)intersection.pShape, intersection.position(), ray, refl_index_medium, scene, reflected, refracted);
 		break;
 	case T_ELLIPSOID:
-		ellipsoidCollision((Ellipsoid*)intersection.pShape, intersection.position(), ray, reflected, refracted);
+		ellipsoidCollision((Ellipsoid*)intersection.pShape, intersection.position(), ray, refl_index_medium, reflected, refracted);
 		break;
 	}
 }
@@ -138,18 +138,30 @@ double CollisionResponse::polarizedReflection(double n1, double n2, double cos_a
 	return reflection;
 }
 
-void CollisionResponse::planeCollision(Plane * p, Point c, Ray * ray, Ray * reflected, Ray * refracted) {
+void CollisionResponse::planeCollision(Plane * p, Point c, Ray * ray, float refl_index_medium, ShapeSet * scene, Ray * reflected, Ray * refracted) {
 	printf("plane collision at (%f, %f, %f)\n", c.x, c.y, c.z);
 
+	float n1 = refl_index_medium;	// dafault: ray outside droplet, source refl = medium
+
+	for (auto s : scene->shapes) {
+		if (s->type == T_ELLIPSOID) {
+			// ray inside droplet
+			if (((Ellipsoid*)s)->isInside(ray->origin)) {
+				n1 = ((Ellipsoid*)s)->reflection;	// source refl = droplet
+				break;
+			}
+		}
+	}
+
 	*reflected = reflect(ray, c, p->normal);
-	*refracted = refract(ray, c, p->normal, 1.0, p->reflection);
+	*refracted = refract(ray, c, p->normal, n1, p->reflection);
 
 	if (refracted->valid) {
 		reflected->energy -= refracted->energy;
 	}
 }
 
-void CollisionResponse::ellipsoidCollision(Ellipsoid * s, Point c, Ray * ray, Ray * reflected, Ray * refracted) {
+void CollisionResponse::ellipsoidCollision(Ellipsoid * s, Point c, Ray * ray, float refl_index_medium, Ray * reflected, Ray * refracted) {
 	printf("ellipsoid collision at (%f, %f, %f)\n", c.x, c.y, c.z);
 
 	auto distance = [](Point a, Point b) {
@@ -164,9 +176,9 @@ void CollisionResponse::ellipsoidCollision(Ellipsoid * s, Point c, Ray * ray, Ra
 
 	if (s->isInside(ray->origin)) {
 		n1 = s->reflection;
-		n2 = 1.0f;
+		n2 = refl_index_medium;
 	} else {
-		n1 = 1.0f;
+		n1 = refl_index_medium;
 		n2 = s->reflection;
 	}
 

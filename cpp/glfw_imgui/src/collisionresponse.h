@@ -8,12 +8,12 @@
 class CollisionResponse
 {
 public:
-	CollisionResponse(Intersection & intersection, Ray * ray, Ray * reflected, Ray * refracted);
+	CollisionResponse(Intersection & intersection, Ray * ray, float refl_index_medium, ShapeSet * scene, Ray * reflected, Ray * refracted);
 	virtual ~CollisionResponse() {};
 
 private:
-	void planeCollision(Plane * p, Point c, Ray * ray, Ray * reflected, Ray * refracted);
-	void ellipsoidCollision(Ellipsoid * s, Point c, Ray * ray, Ray * reflected, Ray * refracted);
+	void planeCollision(Plane * p, Point c, Ray * ray, float refl_index_medium, ShapeSet * scene, Ray * reflected, Ray * refracted);
+	void ellipsoidCollision(Ellipsoid * s, Point c, Ray * ray, float refl_index_medium, Ray * reflected, Ray * refracted);
 
 	Ray reflect(const Ray * r, const Point& c, const Vector& normal);
 	Ray refract(const Ray * r, const Point& c, const Vector& normal, float n1, float n2);

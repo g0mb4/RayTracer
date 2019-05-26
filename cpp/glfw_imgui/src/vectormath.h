@@ -9,10 +9,6 @@
 	#define PI 3.1415926f
 #endif
 
-inline float sqr(float n){
-	return n * n;
-}
-
 struct Vector
 {
 	float x, y, z;

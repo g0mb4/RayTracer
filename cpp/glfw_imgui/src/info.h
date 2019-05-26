@@ -18,14 +18,15 @@
 
 #ifdef _WIN
 	#define strdup	_strdup
-#endif //  _WIN
-
+#endif 
 
 enum E_PTR_TYPE {
 	PT_VOID = 0,
 	PT_INT,
 	PT_FLOAT,
+	PT_DOUBLE,
 	PT_STRING,
+	PT_BOOL,
 };
 
 typedef struct {
@@ -46,7 +47,9 @@ public:
 	void AddVariable(int x, int y, const char * name, void * ptr);
 	void AddVariable(int x, int y, const char * name, int * ptr);
 	void AddVariable(int x, int y, const char * name, float * ptr);
+	void AddVariable(int x, int y, const char * name, double * ptr);
 	void AddVariable(int x, int y, const char * name, const char * ptr);
+	void AddVariable(int x, int y, const char * name, bool * ptr);
 
 	void Write(int x, int y, const char * text);
 	void Refresh(void);

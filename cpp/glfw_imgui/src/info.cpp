@@ -29,8 +29,16 @@ void Info::Refresh(void) {
 				snprintf(buf, 256, "%s: %.4f", i.name.c_str(), *(float*)i.ptr);
 				break;
 
+			case PT_DOUBLE:
+				snprintf(buf, 256, "%s: %.4f", i.name.c_str(), *(double*)i.ptr);
+				break;
+
 			case PT_STRING:
 				snprintf(buf, 256, "%s: %s", i.name.c_str(), (char*)i.ptr);
+				break;
+
+			case PT_BOOL:
+				snprintf(buf, 256, "%s: %s", i.name.c_str(), *(bool*)i.ptr ? "TRUE" : "FALSE");
 				break;
 			}
 		}
@@ -53,8 +61,16 @@ void Info::AddVariable(int x, int y, const char * name, float * ptr) {
 	_add_variable(x, y, name, (void *)ptr, PT_FLOAT);
 }
 
+void Info::AddVariable(int x, int y, const char * name, double * ptr) {
+	_add_variable(x, y, name, (void *)ptr, PT_DOUBLE);
+}
+
 void Info::AddVariable(int x, int y, const char * name, const char * ptr) {
 	_add_variable(x, y, name, (void *)ptr, PT_STRING);
+}
+
+void Info::AddVariable(int x, int y, const char * name, bool * ptr) {
+	_add_variable(x, y, name, (void *)ptr, PT_BOOL);
 }
 
 void Info::_add_variable(int x, int y, const char * name, void * ptr, E_PTR_TYPE type) {

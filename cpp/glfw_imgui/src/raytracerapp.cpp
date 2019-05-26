@@ -15,17 +15,18 @@ RayTracerApp::RayTracerApp(int w, int h) {
 	info->AddVariable(10, 72, "PLANE ENERGY", &total_plane_energy);
 	info->AddVariable(10, 84, "NUMBER OF RAYS", &no_rays);
 
-	info->AddVariable(10, 108, "esc", "close program");
+	info->AddVariable(10, 108, "esc", "stop sim");
 	info->AddVariable(10, 120, "spcae", "step sim");
 	info->AddVariable(10, 132, "s", "start sim");
 	info->AddVariable(10, 144, "r", "reset sim");
+	info->AddVariable(10, 168, "SIM RUNNING", &run_sim);
 
-	info->AddVariable(10, 168, "1", "side cam");
-	info->AddVariable(10, 180, "2", "top cam");
+	info->AddVariable(10, 192, "alpha", &alpha);
 
-	plane = new Plane(Point(0.0f, 0.001f, 0.0f), 1.0f, Vector(0.0f, 1.0f, 0.0f), (4.0f / 3.0f), Color(0.0f, 1.0f, 0.0f));
-	sphere = new Sphere(Point(0.0f, center_y, 0.0f), radius_y, (4.0f / 3.0f), Color(0.0f, 0.0f, 1.0f));
-	ellipsoid = new Ellipsoid(Point(0.0f, center_y, 0.0f), Point(1.0f, radius_y, 1.0f), (4.0f / 3.0f), Color(0.0f, 0.0f, 1.0f));
+	info->AddVariable(10, 204, "1", "side cam");
+	info->AddVariable(10, 216, "2", "top cam");
+
+	plane = nullptr;
 	cube = new Cube(Point(0.0f, -1.0f, 0.0f), 2.0f, Color(0.0f, 0.0f, 0.0f));
 
 	show_axes = false, show_objects = true;
@@ -36,8 +37,6 @@ RayTracerApp::RayTracerApp(int w, int h) {
 	ray_group = 0;
 	start_pos_x = -2.0f, start_pos_y = 0.5f, start_pos_z = 0.0f;
 	alpha = 0;
-	beta = 90; //90;
-	gamma = 90;
 
 	steps = 0;
 	total_plane_collisions = 0;
@@ -58,8 +57,23 @@ RayTracerApp::RayTracerApp(int w, int h) {
 
 	energy_threshold = 0.01;
 
+	refl_index_droplet = 4.0f / 3.0f;
+	refl_index_plane = 4.0f / 3.0f;
+	refl_index_medium = 1.0f;
+
 	grid_x = 1;
 	grid_z = 1;
+
+	strncpy(gnuplot_path, "c:\\Program Files\\gnuplot\\bin\\gnuplot.exe", 2048);
+
+	autom_alpha = false;
+	autom_alpha_start = 0;	
+	autom_alpha_step = 0.01;
+	autom_alpha_end = 20;
+
+	data_set.create("alpha");
+	data_set.create("plane_energy");
+	data_set.create("plane_collisions");
 
 	if (!glfwInit()) {
 		return;
@@ -113,7 +127,11 @@ RayTracerApp::RayTracerApp(int w, int h) {
 
 	sim_reset();
 
+	run_sim = false;
+
 	init_ok = true;
+
+	data_set_items = data_set.get_names_c();
 }
 
 RayTracerApp::~RayTracerApp(void) {
@@ -124,29 +142,31 @@ RayTracerApp::~RayTracerApp(void) {
 	if (control_window) {
 		glfwDestroyWindow(control_window);
 	}
+
+	for (int n = 0; n < data_set_items.size(); n++) {
+		if (data_set_items[n]) {
+			free(data_set_items[n]);
+		}
+	}
 	
 	glfwTerminate();
 
 	DEL_PTR(info);
 	DEL_PTR(plane);
-	DEL_PTR(sphere);
-	DEL_PTR(ellipsoid);
 	DEL_PTR(cube);
 }
 
 void RayTracerApp::sim_step(void) {
 	std::vector<Ray> new_set;
 
-	for (auto &ray : rays) {
-		if (ray && ray.get()->valid) {
-			Intersection intersection(*ray);
+	for (auto ray : rays) {
+		if (ray.valid) {
+			Intersection intersection(ray);
 			if (scene.intersect(intersection)) {
 				Ray reflected;
 				Ray refracted;
 
-				CollisionResponse c(intersection, ray.get(), &reflected, &refracted);
-				ray.release();
-
+				CollisionResponse c(intersection, &ray, refl_index_medium, &scene, &reflected, &refracted);
 				printf("reflected: %f ", reflected.energy);
 				if (refracted.valid) {
 					printf("refracted: %f\n", refracted.energy);
@@ -175,27 +195,47 @@ void RayTracerApp::sim_step(void) {
 					}
 				}
 			}
-			else {
-				ray.release();
-				//rays.remove(ray); // TODO
-			}
 		}
 	}
 
-	for (auto &ray : new_set) {
-		rays.push_back(std::make_unique<Ray>(ray));
-	}
+	rays = new_set;
 	printf("new set: %u\n", new_set.size());
 
 	steps++;
 }
 
-void RayTracerApp::sim_start(void) {
-	while (no_rays > 0) {
-		sim_step();
-		sim_window_draw();
-		Sleep(anim_delay);
+void RayTracerApp::sim_run(void) {
+	data_set.clear_data();
+
+	for (alpha = autom_alpha ? autom_alpha_start : alpha;
+		 !autom_alpha || alpha <= autom_alpha_end;
+		 alpha += autom_alpha ? autom_alpha_step : 0.0f) {
+
+		sim_reset();
+		while (run_sim && no_rays > 0) {
+			sim_step();
+			sim_window_draw();
+			if (anim_delay > 0) {
+				Sleep(anim_delay);
+			}
+		}
+
+		data_set.add_data("alpha", alpha);
+		data_set.add_data("plane_energy", total_plane_energy);
+		data_set.add_data("plane_collisions", total_plane_collisions);
+
+		if (!autom_alpha) {
+			break;
+		}
 	}
+	
+	run_sim = false;
+}
+
+void RayTracerApp::sim_start(void) {
+	run_sim = true;
+	std::thread t(&RayTracerApp::sim_run, this);
+	t.detach();
 }
 
 float RayTracerApp::max_2(float a, float b) {
@@ -217,11 +257,15 @@ void RayTracerApp::sim_reset(void) {
 		return cos(a * (PI / 180.0f));
 	};
 
+	auto sind = [](float a) {
+		return sin(a * (PI / 180.0f));
+	};
+
 	rays.clear();
 
 	// single ray
 	if (ray_group == 0) {
-		rays.push_back(std::make_unique<Ray>(Point(start_pos_x, start_pos_y, start_pos_z), Vector(cosd(alpha), cosd(beta), cosd(gamma))));
+		rays.push_back(Ray(Point(start_pos_x, start_pos_y, start_pos_z), Vector(cosd(alpha), sind(alpha), 0)));
 	}
 	else {
 		float d_y = lamp_width / (float)rays_per_width;
@@ -236,12 +280,17 @@ void RayTracerApp::sim_reset(void) {
 				break;
 			}
 			for (float z = start_z; z < end_z; z += d_z) {
-				rays.push_back(std::make_unique<Ray>(Point(start_pos_x, y, z), Vector(cosd(alpha), cosd(beta), cosd(gamma))));
+				rays.push_back(Ray(Point(start_pos_x, y, z), Vector(cosd(alpha), sind(alpha), 0)));
 			}
 		}
 	}
 
 	scene.clear();
+
+	if (plane != nullptr) {
+		delete plane;
+	}
+	plane = new Plane(Point(0.0f, 0.001f, 0.0f), 1.0f, Vector(0.0f, 1.0f, 0.0f), refl_index_plane, Color(0.0f, 1.0f, 0.0f));
 
 	scene.addShape(plane);
 	if (add_ellipsoid) {
@@ -250,7 +299,7 @@ void RayTracerApp::sim_reset(void) {
 				float x = (i - (grid_x / 2)) * 2;
 				float z = (j - (grid_z / 2)) * 2;
 
-				scene.addShape(new Ellipsoid(Point(x, center_y, z), Point(radius_x, radius_y, radius_z), (4.0f / 3.0f), Color(0.0f, 0.0f, 1.0f)));
+				scene.addShape(new Ellipsoid(Point(x, center_y, z), Point(radius_x, radius_y, radius_z), refl_index_droplet, Color(0.0f, 0.0f, 1.0f)));
 			}
 		}
 	}
@@ -276,7 +325,7 @@ void RayTracerApp::run(void) {
 		glfwPollEvents();
 
 		if (glfwGetKey(sim_window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-			running = false;
+			run_sim = false;
 		}
 
 		space_new = glfwGetKey(sim_window, GLFW_KEY_SPACE);
@@ -331,12 +380,16 @@ void RayTracerApp::sim_window_draw(void) {
 		}
 	}
 
-	no_rays = 0;
-	for (auto &ray : rays) {
-		if (ray && ray.get()->valid) {
-			ray->draw();
-			no_rays++;
+	try {
+		no_rays = 0;
+		for (auto ray : rays) {
+			if (ray.valid) {
+				ray.draw();
+				no_rays++;
+			}
 		}
+	} catch (const std::exception& e) { // caught by reference to base
+		printf("error: %s\n", e.what());
 	}
 
 	info->Refresh();
@@ -362,20 +415,18 @@ void RayTracerApp::control_window_draw(void) {
 
 			ImGui::Separator();
 			ImGui::PushItemWidth(150);
-			if (ImGui::InputFloat("Pos X", &start_pos_x, 0.01f, 1.0f, "%.3f")) { sim_reset(); }
-			if (ImGui::InputFloat("Pos Y", &start_pos_y, 0.01f, 1.0f, "%.3f")) { sim_reset(); }
-			if (ImGui::InputFloat("Pos Z", &start_pos_z, 0.01f, 1.0f, "%.3f")) { sim_reset(); }
+			if (ImGui::InputFloat("Pos X", &start_pos_x, 0.01f, 1.0f, "%.4f")) { sim_reset(); }
+			if (ImGui::InputFloat("Pos Y", &start_pos_y, 0.01f, 1.0f, "%.4f")) { sim_reset(); }
+			if (ImGui::InputFloat("Pos Z", &start_pos_z, 0.01f, 1.0f, "%.4f")) { sim_reset(); }
 
 			ImGui::Separator();
 
-			if(ImGui::InputFloat("Alpha, deg", &alpha, 0.01f, 1.0f, "%.3f")){ sim_reset(); }
-			if(ImGui::InputFloat("Beta, deg",  &beta,  0.01f, 1.0f, "%.3f")){ sim_reset(); }
-			if(ImGui::InputFloat("Gamma, deg", &gamma, 0.01f, 1.0f, "%.3f")){ sim_reset(); }
+			if(ImGui::InputFloat("Alpha, deg", &alpha, 0.01f, 1.0f, "%.4f")){ sim_reset(); }
 
 			if (ray_group == 1) {
 				ImGui::Separator();
-				if (ImGui::InputFloat("Width of lamp", &lamp_width, 0.01f, 1.0f, "%.3f")) { sim_reset(); }
-				if (ImGui::InputFloat("Height of lamp", &lamp_height, 0.01f, 1.0f, "%.3f")) { sim_reset(); }
+				if (ImGui::InputFloat("Width of lamp", &lamp_width, 0.01f, 1.0f, "%.4f")) { sim_reset(); }
+				if (ImGui::InputFloat("Height of lamp", &lamp_height, 0.01f, 1.0f, "%.4f")) { sim_reset(); }
 				if (ImGui::InputInt("Rays per width", &rays_per_width)) { sim_reset(); }
 				if (ImGui::InputInt("Rays per height", &rays_per_height)) { sim_reset(); }
 			}
@@ -384,21 +435,38 @@ void RayTracerApp::control_window_draw(void) {
 		if (ImGui::CollapsingHeader("Objects")) {
 			if(ImGui::Checkbox("Ellipsoid", &add_ellipsoid)) { sim_reset(); }
 			ImGui::Separator();
-			if (ImGui::InputFloat("Center Y", &center_y, 0.01f, 0.1f, "%.3f")) { sim_reset(); }
-			if (ImGui::InputFloat("Radius X", &radius_x, 0.01f, 0.1f, "%.3f")) { sim_reset(); }
-			if (ImGui::InputFloat("Radius Y", &radius_y, 0.01f, 0.1f, "%.3f")) { sim_reset(); }
-			if (ImGui::InputFloat("Radius Z", &radius_z, 0.01f, 0.1f, "%.3f")) { sim_reset(); }
+			if (ImGui::InputFloat("Center Y", &center_y, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
+			if (ImGui::InputFloat("Radius X", &radius_x, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
+			if (ImGui::InputFloat("Radius Y", &radius_y, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
+			if (ImGui::InputFloat("Radius Z", &radius_z, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
 			if (ImGui::InputInt("Objects per X", &grid_x)) { sim_reset(); }
 			if (ImGui::InputInt("Objects per Z", &grid_z)) { sim_reset(); }
+		}
+
+		if (ImGui::CollapsingHeader("Properties")) {
+			if (ImGui::InputFloat("Refl. index of droplet", &refl_index_droplet, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
+			if (ImGui::InputFloat("Refl. index of plane", &refl_index_plane, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
+			if (ImGui::InputFloat("Refl. index of medium", &refl_index_medium, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
+			if (ImGui::InputFloat("Energy threshold", &energy_threshold, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
 		}
 
 		if (ImGui::CollapsingHeader("View")) {
 			ImGui::Checkbox("Show axes (red: X, green: Y, blue: Z)", &show_axes);
 			ImGui::Checkbox("Show objects", &show_objects);
 			ImGui::Checkbox("Hider cube", &hider_cube);
-			ImGui::InputFloat("Cam X", &cam_x, 0.01f, 0.1f, "%.3f");
-			ImGui::InputFloat("Cam Y", &cam_y, 0.01f, 0.1f, "%.3f");
-			ImGui::InputFloat("Cam Z", &cam_z, 0.01f, 0.1f, "%.3f");
+			ImGui::InputFloat("Cam X", &cam_x, 0.01f, 0.1f, "%.4f");
+			ImGui::InputFloat("Cam Y", &cam_y, 0.01f, 0.1f, "%.4f");
+			ImGui::InputFloat("Cam Z", &cam_z, 0.01f, 0.1f, "%.4f");
+		}
+
+		if (ImGui::CollapsingHeader("gnuplot")) {
+			ImGui::InputText("path of gnuplot", gnuplot_path, 2048);
+
+			if (ImGui::Button("plot")) {
+				Gnuplot gp(gnuplot_path);
+
+				gp.plot({1, 2, 3},{4, 5, 6});
+			}
 		}
 
 		if (ImGui::CollapsingHeader("Render")) {
@@ -413,10 +481,22 @@ void RayTracerApp::control_window_draw(void) {
 		ImGui::Separator();
 
 		ImGui::BeginGroup();
-		ImGui::Text("--- SIMULATION");
-		ImGui::InputInt("Delay, ms", &anim_delay);
+		if (run_sim) {
+			ImGui::Text("--- SIMULATION : RUNNING");
+		} else {
+			ImGui::Text("--- SIMULATION");
+		}
 
-		if (ImGui::InputFloat("Energy threshold", &energy_threshold, 0.01f, 0.1f, "%.3f")) { sim_reset(); }
+		if (ImGui::CollapsingHeader("Automation")) {
+			ImGui::Checkbox("Automate alpha", &autom_alpha);
+			if (autom_alpha) {
+				ImGui::InputFloat("Start alpha", &autom_alpha_start, 0.01f, 0.1f, "%.4f");
+				ImGui::InputFloat("Step alpha" , &autom_alpha_step, 0.01f, 0.1f, "%.4f");
+				ImGui::InputFloat("End alpha"  , &autom_alpha_end, 0.01f, 0.1f, "%.4f");
+			}
+			
+			ImGui::InputInt("Sim delay, ms", &anim_delay);
+		}
 
 		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(186, 154, 0));
 		if (ImGui::Button("Step")) {
@@ -424,18 +504,62 @@ void RayTracerApp::control_window_draw(void) {
 		}
 		ImGui::PopStyleColor(1);
 		ImGui::SameLine();
-		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(16, 163, 0));
-		if (ImGui::Button("Start")) {
-			sim_start();
+
+		if (run_sim) {
+			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(247, 12, 12));
+			if (ImGui::Button("Stop")) {
+				run_sim = false;
+			}
+		} else {
+			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(16, 163, 0));
+			if (ImGui::Button("Start")) {
+				sim_start();
+			}
 		}
 		ImGui::PopStyleColor(1);
 		ImGui::SameLine();
-		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(247, 12, 12));
+		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(66, 75, 244));
 		if (ImGui::Button("Reset")) {
 			sim_reset();
 		}
 		ImGui::PopStyleColor(1);
 		ImGui::EndGroup();
+
+		if (ImGui::CollapsingHeader("Data")) {
+			static char * item_x = data_set_items[0];
+			if (ImGui::BeginCombo("X", item_x)) // The second parameter is the label previewed before opening the combo.
+			{
+				for (int n = 0; n < data_set_items.size(); n++)
+				{
+					bool is_selected = (item_x == data_set_items[n]);
+					if (ImGui::Selectable(data_set_items[n], is_selected))
+						item_x = data_set_items[n];
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();   // Set the initial focus when opening the combo (scrolling + for keyboard navigation support in the upcoming navigation branch)
+				}
+				ImGui::EndCombo();
+			}
+
+			static char * item_y = data_set_items[0];
+			if (ImGui::BeginCombo("Y", item_y)) // The second parameter is the label previewed before opening the combo.
+			{
+				for (int n = 0; n < data_set_items.size(); n++)
+				{
+					bool is_selected = (item_y == data_set_items[n]);
+					if (ImGui::Selectable(data_set_items[n], is_selected))
+						item_y = data_set_items[n];
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();   // Set the initial focus when opening the combo (scrolling + for keyboard navigation support in the upcoming navigation branch)
+				}
+				ImGui::EndCombo();
+			}
+
+			if (ImGui::Button("plot 2D")) {
+				Gnuplot gp(gnuplot_path);
+
+				gp.plot(data_set.get_data(item_x), data_set.get_data(item_y));
+			}
+		}
 
 		ImGui::Separator();
 		ImGui::Separator();
@@ -526,7 +650,11 @@ void RayTracerApp::render_image(void) {
 		return cos(a * (PI / 180.0f));
 	};
 
-	PerspectiveCamera camera(Point(start_pos_x, start_pos_y, start_pos_z), Vector(cosd(alpha), cosd(beta), cosd(gamma)), Vector(), 25.0f * PI / 180.0f, (float)render_width / (float)render_height);
+	auto sind = [](float a) {
+		return sin(a * (PI / 180.0f));
+	};
+
+	PerspectiveCamera camera(Point(start_pos_x, start_pos_y, start_pos_z), Vector(cosd(alpha), sind(alpha), 0), Vector(), 25.0f * PI / 180.0f, (float)render_width / (float)render_height);
 	Color * buf = new Color[render_width * render_height];
 
 	auto t1 = std::chrono::high_resolution_clock::now();

@@ -3,30 +3,22 @@
 #include "vectormath.h"
 
 Vector::Vector()
-	: x(0.0f),
-	y(1.0f),
-	z(0.0f)
+	: x(0.0f), y(1.0f), z(0.0f)
 {
 }
 
 Vector::Vector(const Vector& v)
-	: x(v.x),
-	y(v.y),
-	z(v.z)
+	: x(v.x), y(v.y), z(v.z)
 {
 }
 
 Vector::Vector(float x, float y, float z)
-	: x(x),
-	y(y),
-	z(z)
+	: x(x), y(y), z(z)
 {
 }
 
 Vector::Vector(float f)
-	: x(f),
-	y(f),
-	z(f)
+	: x(f), y(f), z(f)
 {
 }
 
@@ -125,20 +117,17 @@ Vector2::Vector2()
 }
 
 Vector2::Vector2(const Vector2 &v)
-	: u(v.u),
-	v(v.v)
+	: u(v.u), v(v.v)
 {
 }
 
 Vector2::Vector2(float u, float v)
-	: u(u),
-	v(v)
+	: u(u), v(v)
 {
 }
 
 Vector2::Vector2(float f)
-	: u(f),
-	v(f)
+	: u(f), v(f)
 {
 }
 
@@ -146,9 +135,9 @@ Vector2::~Vector2()
 {
 }
 
-Vector2& Vector2::operator =(const Vector2& v)
+Vector2& Vector2::operator =(const Vector2& vec)
 {
-	u = v.u;
-	this->v = v.v;
+	u = vec.u;
+	v = vec.v;
 	return *this;
 }

@@ -6,6 +6,7 @@
 #include <list>
 #include <memory>
 #include <functional>
+#include <thread>
 
 #include <Windows.h>
 
@@ -24,6 +25,9 @@
 #include "camera.h"
 #include "color.h"
 
+#include "gnuplot.h"
+#include "data_set.h"
+
 #define DEL_PTR(x)	if(x) { delete x; };
 
 class RayTracerApp {
@@ -41,6 +45,7 @@ public:
 	void sim_step(void);
 	void sim_start(void);
 	void sim_reset(void);
+	void sim_run(void);
 
 	bool is_init_ok(void) { return init_ok; };
 private:
@@ -52,23 +57,22 @@ private:
 	bool init_ok;
 
 	bool running = true;
+	bool run_sim = false;
 
 	int window_width, window_height;
 
 	GLFWwindow * sim_window;
 	GLFWwindow * control_window;
 
-	const int CONTROL_WIN_WIDTH = 380;
+	const int CONTROL_WIN_WIDTH = 500;
 
 	ImGuiWindowFlags imgui_flags;
 
 	Info * info;
 
-	std::list<std::unique_ptr<Ray>> rays;
+	std::vector<Ray> rays;
 	ShapeSet scene;
-	Plane * plane; // (Point(0.0f, 0.0f, 0.0f), 1.0f, Vector(0.0f, 1.0f, 0.0f));
-	Sphere * sphere; // (Point(0.0f, 1.0f, 0.0f), 1.0f, (4.0f / 3.0f));
-	Ellipsoid * ellipsoid;
+	Plane * plane;
 	Cube * cube;
 
 	bool show_axes, show_objects, hider_cube;
@@ -77,7 +81,7 @@ private:
 	int ray_group;
 	int fps;
 	float start_pos_x, start_pos_y, start_pos_z;
-	float alpha, beta, gamma;
+	float alpha;
 
 	int steps;
 	int total_plane_collisions;
@@ -97,7 +101,17 @@ private:
 
 	int grid_x, grid_z;
 
+	float refl_index_droplet, refl_index_plane, refl_index_medium;
+
 	float energy_threshold;
+
+	char gnuplot_path[2048];
+
+	bool autom_alpha;
+	float autom_alpha_start, autom_alpha_step, autom_alpha_end;
+
+	Data_Set data_set;
+	std::vector<char *> data_set_items;
 };
 
 #endif
