@@ -19,19 +19,19 @@ struct Ray
 {
 	Point origin; // start
 	Vector direction;
-	float tMax;
+	double tMax;
 	bool valid;
-	float energy;
+	double energy;
 
 	Ray();
 	Ray(const Ray& r);
-	Ray(const Point& origin, const Vector& direction, float tMax = RAY_T_MAX);
+	Ray(const Point& origin, const Vector& direction, double tMax = RAY_T_MAX);
 
 	virtual ~Ray() {};
 
 	Ray& operator =(const Ray& r);
 
-	Point calculate(float t) const;
+	Point calculate(double t) const;
 
 	void draw(void);
 	void addPoint(Point p);
@@ -44,7 +44,7 @@ class Shape;
 struct Intersection
 {
 	Ray ray;
-	float t;
+	double t;
 	Shape *pShape;
 
 	Intersection();

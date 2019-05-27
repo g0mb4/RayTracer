@@ -49,10 +49,13 @@ public:
 
 	bool is_init_ok(void) { return init_ok; };
 private:
-	void draw_axes(float s);
+	void draw_axes(double s);
 	void render_image(void);
-	float max_2(float a, float b);
-	float max_3(float a, float b, float c);
+	double max_2(double a, double b);
+	double max_3(double a, double b, double c);
+
+	bool save_settings(const char * fname);
+	bool load_settings(const char * fname);
 
 	bool init_ok;
 
@@ -80,35 +83,34 @@ private:
 
 	int ray_group;
 	int fps;
-	float start_pos_x, start_pos_y, start_pos_z;
-	float alpha;
+	double start_pos_x, start_pos_y, start_pos_z;
+	double alpha;
 
 	int steps;
 	int total_plane_collisions;
-	float total_plane_energy;
+	double total_plane_energy;
 	int no_rays;
  
-	float cam_x, cam_y, cam_z;
+	double cam_x, cam_y, cam_z;
 
-	float lamp_width, lamp_height;
+	double lamp_width, lamp_height;
 	int rays_per_width, rays_per_height;
 
-	int anim_delay;
-
 	int render_width, render_height;
-	float center_y;
-	float radius_x, radius_y, radius_z;
+	double center_y;
+	double radius_x, radius_y, radius_z;
 
 	int grid_x, grid_z;
 
-	float refl_index_droplet, refl_index_plane, refl_index_medium;
+	double refl_index_droplet, refl_index_plane, refl_index_medium;
 
-	float energy_threshold;
+	double energy_threshold;
 
 	char gnuplot_path[2048];
+	char settings_file[2048];
 
 	bool autom_alpha;
-	float autom_alpha_start, autom_alpha_step, autom_alpha_end;
+	double autom_alpha_start, autom_alpha_step, autom_alpha_end;
 
 	Data_Set data_set;
 	std::vector<char *> data_set_items;

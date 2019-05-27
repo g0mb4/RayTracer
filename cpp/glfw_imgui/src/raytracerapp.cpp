@@ -51,8 +51,6 @@ RayTracerApp::RayTracerApp(int w, int h) {
 	center_y = 0.0f;
 	radius_x = radius_y = radius_z = 1.0f;
 
-	anim_delay = 500;
-
 	render_width = 640, render_height = 480;
 
 	energy_threshold = 0.01;
@@ -65,6 +63,7 @@ RayTracerApp::RayTracerApp(int w, int h) {
 	grid_z = 1;
 
 	strncpy(gnuplot_path, "c:\\Program Files\\gnuplot\\bin\\gnuplot.exe", 2048);
+	strncpy(settings_file, "default", 2048);
 
 	autom_alpha = false;
 	autom_alpha_start = 0;	
@@ -125,6 +124,8 @@ RayTracerApp::RayTracerApp(int w, int h) {
 	//imgui_flags |= ImGuiWindowFlags_NoBackground;
 	//imgui_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
 
+	load_settings("default");
+
 	sim_reset();
 
 	run_sim = false;
@@ -167,12 +168,9 @@ void RayTracerApp::sim_step(void) {
 				Ray refracted;
 
 				CollisionResponse c(intersection, &ray, refl_index_medium, &scene, &reflected, &refracted);
-				printf("reflected: %f ", reflected.energy);
-				if (refracted.valid) {
-					printf("refracted: %f\n", refracted.energy);
-				} else {
-					printf("\n");
-				}
+
+				printf("  reflected: %f %s (%s) dir: (%f; %f; %f)\n", reflected.energy, reflected.energy == 0.0 ? "(ZERO)" : "", reflected.valid ? "vaild" : "invalid", reflected.direction.x, reflected.direction.y, reflected.direction.z);
+				printf("  refracted: %f (%s) dir: (%f; %f; %f)\n", refracted.energy, refracted.valid ? "vaild" : "invalid", refracted.direction.x, refracted.direction.y, refracted.direction.z);
 
 				if (intersection.pShape->type == T_PLANE) {
 					total_plane_collisions++;
@@ -198,9 +196,13 @@ void RayTracerApp::sim_step(void) {
 		}
 	}
 
-	rays = new_set;
-	printf("new set: %u\n", new_set.size());
-
+//	if (rays != new_set) {
+		rays = new_set;
+		printf("new set: %u\n", new_set.size());
+//	} else {
+//		rays.clear(); // end of sim
+//	}
+	
 	steps++;
 }
 
@@ -212,12 +214,9 @@ void RayTracerApp::sim_run(void) {
 		 alpha += autom_alpha ? autom_alpha_step : 0.0f) {
 
 		sim_reset();
-		while (run_sim && no_rays > 0) {
+		while (run_sim && rays.size() > 0) {
 			sim_step();
 			sim_window_draw();
-			if (anim_delay > 0) {
-				Sleep(anim_delay);
-			}
 		}
 
 		data_set.add_data("alpha", alpha);
@@ -228,7 +227,7 @@ void RayTracerApp::sim_run(void) {
 			break;
 		}
 	}
-	
+
 	run_sim = false;
 }
 
@@ -238,11 +237,11 @@ void RayTracerApp::sim_start(void) {
 	t.detach();
 }
 
-float RayTracerApp::max_2(float a, float b) {
+double RayTracerApp::max_2(double a, double b) {
 	return a > b ? a : b;
 }
 
-float RayTracerApp::max_3(float n1, float n2, float n3) {
+double RayTracerApp::max_3(double n1, double n2, double n3) {
 	if (n1 > n2 && n1 > n3){
 		return n1;
 	} else if (n2 > n1 && n2 > n3){
@@ -253,11 +252,11 @@ float RayTracerApp::max_3(float n1, float n2, float n3) {
 }
 
 void RayTracerApp::sim_reset(void) {
-	auto cosd = [](float a) {
+	auto cosd = [](double a) {
 		return cos(a * (PI / 180.0f));
 	};
 
-	auto sind = [](float a) {
+	auto sind = [](double a) {
 		return sin(a * (PI / 180.0f));
 	};
 
@@ -268,18 +267,18 @@ void RayTracerApp::sim_reset(void) {
 		rays.push_back(Ray(Point(start_pos_x, start_pos_y, start_pos_z), Vector(cosd(alpha), sind(alpha), 0)));
 	}
 	else {
-		float d_y = lamp_width / (float)rays_per_width;
-		float d_z = lamp_height / (float)rays_per_height;
-		float start_y = start_pos_y - (lamp_width / 2.0f);
-		float end_y = start_pos_y + (lamp_width / 2.0f);
-		float start_z = start_pos_z - (lamp_height / 2.0f);
-		float end_z = start_pos_z + (lamp_height / 2.0f);
+		double d_y = lamp_width / (double)rays_per_width;
+		double d_z = lamp_height / (double)rays_per_height;
+		double start_y = start_pos_y - (lamp_width / 2.0f);
+		double end_y = start_pos_y + (lamp_width / 2.0f);
+		double start_z = start_pos_z - (lamp_height / 2.0f);
+		double end_z = start_pos_z + (lamp_height / 2.0f);
 
-		for (float y = end_y; y > start_y; y -= d_y) {
+		for (double y = end_y; y > start_y; y -= d_y) {
 			if (y <= 0.0f) {
 				break;
 			}
-			for (float z = start_z; z < end_z; z += d_z) {
+			for (double z = start_z; z < end_z; z += d_z) {
 				rays.push_back(Ray(Point(start_pos_x, y, z), Vector(cosd(alpha), sind(alpha), 0)));
 			}
 		}
@@ -296,15 +295,15 @@ void RayTracerApp::sim_reset(void) {
 	if (add_ellipsoid) {
 		for (int i = 0; i < grid_x; i++) {
 			for (int j = 0; j < grid_z; j++) {
-				float x = (i - (grid_x / 2)) * 2;
-				float z = (j - (grid_z / 2)) * 2;
+				double x = (i - (grid_x / 2)) * 2;
+				double z = (j - (grid_z / 2)) * 2;
 
 				scene.addShape(new Ellipsoid(Point(x, center_y, z), Point(radius_x, radius_y, radius_z), refl_index_droplet, Color(0.0f, 0.0f, 1.0f)));
 			}
 		}
 	}
 
-	float hsl = max_3(radius_x, radius_y, radius_z) * max_2(grid_x, grid_z) * 2;
+	double hsl = max_3(radius_x, radius_y, radius_z) * max_2(grid_x, grid_z) * 2;
 
 	cube->halfSideLength = hsl;
 	cube->centre.y = -hsl;
@@ -362,25 +361,26 @@ void RayTracerApp::sim_window_draw(void) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 
-	gluLookAt(cam_x, cam_y, cam_z, 0, 0, 0, 0, 1, 0);
+	if (!run_sim) {
+		gluLookAt(cam_x, cam_y, cam_z, 0, 0, 0, 0, 1, 0);
 
-	if (show_axes) {
-		draw_axes(0.1f);
-	}
+		if (show_axes) {
+			draw_axes(0.1f);
+		}
 
-	if (show_objects) {
-		for (auto s : scene.shapes) {
-			if (s->type == T_CUBE) {
-				if (hider_cube) {
+		if (show_objects) {
+			for (auto s : scene.shapes) {
+				if (s->type == T_CUBE) {
+					if (hider_cube) {
+						s->draw();
+					}
+				}
+				else {
 					s->draw();
 				}
-			} else {
-				s->draw();
 			}
 		}
-	}
-
-	try {
+	
 		no_rays = 0;
 		for (auto ray : rays) {
 			if (ray.valid) {
@@ -388,8 +388,6 @@ void RayTracerApp::sim_window_draw(void) {
 				no_rays++;
 			}
 		}
-	} catch (const std::exception& e) { // caught by reference to base
-		printf("error: %s\n", e.what());
 	}
 
 	info->Refresh();
@@ -415,18 +413,18 @@ void RayTracerApp::control_window_draw(void) {
 
 			ImGui::Separator();
 			ImGui::PushItemWidth(150);
-			if (ImGui::InputFloat("Pos X", &start_pos_x, 0.01f, 1.0f, "%.4f")) { sim_reset(); }
-			if (ImGui::InputFloat("Pos Y", &start_pos_y, 0.01f, 1.0f, "%.4f")) { sim_reset(); }
-			if (ImGui::InputFloat("Pos Z", &start_pos_z, 0.01f, 1.0f, "%.4f")) { sim_reset(); }
+			if (ImGui::InputDouble("Pos X", &start_pos_x, 0.01f, 1.0f, "%.4f")) { sim_reset(); }
+			if (ImGui::InputDouble("Pos Y", &start_pos_y, 0.01f, 1.0f, "%.4f")) { sim_reset(); }
+			if (ImGui::InputDouble("Pos Z", &start_pos_z, 0.01f, 1.0f, "%.4f")) { sim_reset(); }
 
 			ImGui::Separator();
 
-			if(ImGui::InputFloat("Alpha, deg", &alpha, 0.01f, 1.0f, "%.4f")){ sim_reset(); }
+			if(ImGui::InputDouble("Alpha, deg", &alpha, 0.01f, 1.0f, "%.4f")){ sim_reset(); }
 
 			if (ray_group == 1) {
 				ImGui::Separator();
-				if (ImGui::InputFloat("Width of lamp", &lamp_width, 0.01f, 1.0f, "%.4f")) { sim_reset(); }
-				if (ImGui::InputFloat("Height of lamp", &lamp_height, 0.01f, 1.0f, "%.4f")) { sim_reset(); }
+				if (ImGui::InputDouble("Width of lamp", &lamp_width, 0.01f, 1.0f, "%.4f")) { sim_reset(); }
+				if (ImGui::InputDouble("Height of lamp", &lamp_height, 0.01f, 1.0f, "%.4f")) { sim_reset(); }
 				if (ImGui::InputInt("Rays per width", &rays_per_width)) { sim_reset(); }
 				if (ImGui::InputInt("Rays per height", &rays_per_height)) { sim_reset(); }
 			}
@@ -435,38 +433,32 @@ void RayTracerApp::control_window_draw(void) {
 		if (ImGui::CollapsingHeader("Objects")) {
 			if(ImGui::Checkbox("Ellipsoid", &add_ellipsoid)) { sim_reset(); }
 			ImGui::Separator();
-			if (ImGui::InputFloat("Center Y", &center_y, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
-			if (ImGui::InputFloat("Radius X", &radius_x, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
-			if (ImGui::InputFloat("Radius Y", &radius_y, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
-			if (ImGui::InputFloat("Radius Z", &radius_z, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
+			if (ImGui::InputDouble("Center Y", &center_y, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
+			if (ImGui::InputDouble("Radius X", &radius_x, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
+			if (ImGui::InputDouble("Radius Y", &radius_y, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
+			if (ImGui::InputDouble("Radius Z", &radius_z, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
 			if (ImGui::InputInt("Objects per X", &grid_x)) { sim_reset(); }
 			if (ImGui::InputInt("Objects per Z", &grid_z)) { sim_reset(); }
 		}
 
 		if (ImGui::CollapsingHeader("Properties")) {
-			if (ImGui::InputFloat("Refl. index of droplet", &refl_index_droplet, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
-			if (ImGui::InputFloat("Refl. index of plane", &refl_index_plane, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
-			if (ImGui::InputFloat("Refl. index of medium", &refl_index_medium, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
-			if (ImGui::InputFloat("Energy threshold", &energy_threshold, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
+			if (ImGui::InputDouble("Refl. index of droplet", &refl_index_droplet, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
+			if (ImGui::InputDouble("Refl. index of plane", &refl_index_plane, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
+			if (ImGui::InputDouble("Refl. index of medium", &refl_index_medium, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
+			if (ImGui::InputDouble("Energy threshold", &energy_threshold, 0.01f, 0.1f, "%.4f")) { sim_reset(); }
 		}
 
 		if (ImGui::CollapsingHeader("View")) {
 			ImGui::Checkbox("Show axes (red: X, green: Y, blue: Z)", &show_axes);
 			ImGui::Checkbox("Show objects", &show_objects);
 			ImGui::Checkbox("Hider cube", &hider_cube);
-			ImGui::InputFloat("Cam X", &cam_x, 0.01f, 0.1f, "%.4f");
-			ImGui::InputFloat("Cam Y", &cam_y, 0.01f, 0.1f, "%.4f");
-			ImGui::InputFloat("Cam Z", &cam_z, 0.01f, 0.1f, "%.4f");
+			ImGui::InputDouble("Cam X", &cam_x, 0.01f, 0.1f, "%.4f");
+			ImGui::InputDouble("Cam Y", &cam_y, 0.01f, 0.1f, "%.4f");
+			ImGui::InputDouble("Cam Z", &cam_z, 0.01f, 0.1f, "%.4f");
 		}
 
 		if (ImGui::CollapsingHeader("gnuplot")) {
 			ImGui::InputText("path of gnuplot", gnuplot_path, 2048);
-
-			if (ImGui::Button("plot")) {
-				Gnuplot gp(gnuplot_path);
-
-				gp.plot({1, 2, 3},{4, 5, 6});
-			}
 		}
 
 		if (ImGui::CollapsingHeader("Render")) {
@@ -490,12 +482,10 @@ void RayTracerApp::control_window_draw(void) {
 		if (ImGui::CollapsingHeader("Automation")) {
 			ImGui::Checkbox("Automate alpha", &autom_alpha);
 			if (autom_alpha) {
-				ImGui::InputFloat("Start alpha", &autom_alpha_start, 0.01f, 0.1f, "%.4f");
-				ImGui::InputFloat("Step alpha" , &autom_alpha_step, 0.01f, 0.1f, "%.4f");
-				ImGui::InputFloat("End alpha"  , &autom_alpha_end, 0.01f, 0.1f, "%.4f");
+				ImGui::InputDouble("Start alpha", &autom_alpha_start, 0.01f, 0.1f, "%.4f");
+				ImGui::InputDouble("Step alpha" , &autom_alpha_step, 0.01f, 0.1f, "%.4f");
+				ImGui::InputDouble("End alpha"  , &autom_alpha_end, 0.01f, 0.1f, "%.4f");
 			}
-			
-			ImGui::InputInt("Sim delay, ms", &anim_delay);
 		}
 
 		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(186, 154, 0));
@@ -563,6 +553,22 @@ void RayTracerApp::control_window_draw(void) {
 
 		ImGui::Separator();
 		ImGui::Separator();
+		if (ImGui::CollapsingHeader("Save/Load")) {
+
+			ImGui::InputText("settings file", settings_file, 2048);
+			if (ImGui::Button("Save")) {
+				save_settings(settings_file);
+				sim_reset();
+			}
+
+			if (ImGui::Button("Load")) {
+				load_settings(settings_file);
+				sim_reset();
+			}
+		}
+
+		ImGui::Separator();
+		ImGui::Separator();
 		if (ImGui::Button("Quit")) {
 			running = false;
 		}
@@ -578,7 +584,7 @@ void RayTracerApp::control_window_draw(void) {
 	glfwSwapBuffers(control_window);
 }
 
-void RayTracerApp::draw_axes(float s) {
+void RayTracerApp::draw_axes(double s) {
 	glPushMatrix();
 
 	glScalef(s, s, s);
@@ -646,15 +652,15 @@ void RayTracerApp::render_image(void) {
 
 	std::vector<Color> image;
 
-	auto cosd = [](float a) {
+	auto cosd = [](double a) {
 		return cos(a * (PI / 180.0f));
 	};
 
-	auto sind = [](float a) {
+	auto sind = [](double a) {
 		return sin(a * (PI / 180.0f));
 	};
 
-	PerspectiveCamera camera(Point(start_pos_x, start_pos_y, start_pos_z), Vector(cosd(alpha), sind(alpha), 0), Vector(), 25.0f * PI / 180.0f, (float)render_width / (float)render_height);
+	PerspectiveCamera camera(Point(start_pos_x, start_pos_y, start_pos_z), Vector(cosd(alpha), sind(alpha), 0), Vector(), 25.0f * PI / 180.0f, (double)render_width / (double)render_height);
 	Color * buf = new Color[render_width * render_height];
 
 	auto t1 = std::chrono::high_resolution_clock::now();
@@ -710,3 +716,126 @@ void RayTracerApp::render_image(void) {
 		glfwDestroyWindow(render_window);
 	}
 }
+
+bool RayTracerApp::save_settings(const char * fname) {
+	char file[2048];
+	snprintf(file, 2048, "%s.rts", fname);
+
+	FILE * fp = fopen(file, "wb");
+	
+	if (!fp){
+		fprintf(stderr, "unable to create '%s'\n", file);
+		return false;
+	}
+
+	fwrite(&show_axes, sizeof(show_axes), 1, fp);
+	fwrite(&show_objects, sizeof(show_objects), 1, fp);
+	fwrite(&hider_cube, sizeof(hider_cube), 1, fp);
+
+	fwrite(&add_sphere, sizeof(add_sphere), 1, fp);
+	fwrite(&add_ellipsoid, sizeof(add_ellipsoid), 1, fp);
+
+	fwrite(&ray_group, sizeof(ray_group), 1, fp);
+
+	fwrite(&start_pos_x, sizeof(start_pos_x), 1, fp);
+	fwrite(&start_pos_y, sizeof(start_pos_y), 1, fp);
+	fwrite(&start_pos_z, sizeof(start_pos_z), 1, fp);
+
+	fwrite(&cam_x, sizeof(cam_x), 1, fp);
+	fwrite(&cam_y, sizeof(cam_y), 1, fp);
+	fwrite(&cam_z, sizeof(cam_z), 1, fp);
+
+	fwrite(&lamp_width, sizeof(lamp_width), 1, fp);
+	fwrite(&lamp_height, sizeof(lamp_height), 1, fp);
+	fwrite(&rays_per_width, sizeof(rays_per_width), 1, fp);
+	fwrite(&rays_per_height, sizeof(rays_per_height), 1, fp);
+
+	fwrite(&render_width, sizeof(render_width), 1, fp);
+	fwrite(&render_height, sizeof(render_height), 1, fp);
+
+	fwrite(&center_y, sizeof(center_y), 1, fp);
+	fwrite(&radius_x, sizeof(radius_x), 1, fp);
+	fwrite(&radius_y, sizeof(radius_y), 1, fp);
+	fwrite(&radius_z, sizeof(radius_z), 1, fp);
+
+	fwrite(&grid_x, sizeof(grid_x), 1, fp);
+	fwrite(&grid_z, sizeof(grid_z), 1, fp);
+
+	fwrite(&refl_index_droplet, sizeof(refl_index_droplet), 1, fp);
+	fwrite(&refl_index_plane, sizeof(refl_index_plane), 1, fp);
+	fwrite(&refl_index_medium, sizeof(refl_index_medium), 1, fp);
+	fwrite(&energy_threshold, sizeof(energy_threshold), 1, fp);
+
+	fwrite(&autom_alpha, sizeof(autom_alpha), 1, fp);
+	fwrite(&autom_alpha_start, sizeof(autom_alpha_start), 1, fp);
+	fwrite(&autom_alpha_step, sizeof(autom_alpha_step), 1, fp);
+	fwrite(&autom_alpha_end, sizeof(autom_alpha_end), 1, fp);
+
+	fclose(fp);
+
+	printf("'%s' was saved\n", file);
+
+	return true;
+}
+
+bool RayTracerApp::load_settings(const char * fname) {
+	char file[2048];
+	snprintf(file, 2048, "%s.rts", fname);
+
+	FILE * fp = fopen(file, "rb");
+
+	if (!fp) {
+		fprintf(stderr, "unable to read '%s'\n", file);
+		return false;
+	}
+
+	fread(&show_axes, sizeof(show_axes), 1, fp);
+	fread(&show_objects, sizeof(show_objects), 1, fp);
+	fread(&hider_cube, sizeof(hider_cube), 1, fp);
+
+	fread(&add_sphere, sizeof(add_sphere), 1, fp);
+	fread(&add_ellipsoid, sizeof(add_ellipsoid), 1, fp);
+
+	fread(&ray_group, sizeof(ray_group), 1, fp);
+
+	fread(&start_pos_x, sizeof(start_pos_x), 1, fp);
+	fread(&start_pos_y, sizeof(start_pos_y), 1, fp);
+	fread(&start_pos_z, sizeof(start_pos_z), 1, fp);
+
+	fread(&cam_x, sizeof(cam_x), 1, fp);
+	fread(&cam_y, sizeof(cam_y), 1, fp);
+	fread(&cam_z, sizeof(cam_z), 1, fp);
+
+	fread(&lamp_width, sizeof(lamp_width), 1, fp);
+	fread(&lamp_height, sizeof(lamp_height), 1, fp);
+	fread(&rays_per_width, sizeof(rays_per_width), 1, fp);
+	fread(&rays_per_height, sizeof(rays_per_height), 1, fp);
+
+	fread(&render_width, sizeof(render_width), 1, fp);
+	fread(&render_height, sizeof(render_height), 1, fp);
+
+	fread(&center_y, sizeof(center_y), 1, fp);
+	fread(&radius_x, sizeof(radius_x), 1, fp);
+	fread(&radius_y, sizeof(radius_y), 1, fp);
+	fread(&radius_z, sizeof(radius_z), 1, fp);
+
+	fread(&grid_x, sizeof(grid_x), 1, fp);
+	fread(&grid_z, sizeof(grid_z), 1, fp);
+
+	fread(&refl_index_droplet, sizeof(refl_index_droplet), 1, fp);
+	fread(&refl_index_plane, sizeof(refl_index_plane), 1, fp);
+	fread(&refl_index_medium, sizeof(refl_index_medium), 1, fp);
+	fread(&energy_threshold, sizeof(energy_threshold), 1, fp);
+
+	fread(&autom_alpha, sizeof(autom_alpha), 1, fp);
+	fread(&autom_alpha_start, sizeof(autom_alpha_start), 1, fp);
+	fread(&autom_alpha_step, sizeof(autom_alpha_step), 1, fp);
+	fread(&autom_alpha_end, sizeof(autom_alpha_end), 1, fp);
+
+	fclose(fp);
+
+	printf("'%s' was loaded\n", file);
+
+	return true;
+}
+

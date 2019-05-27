@@ -20,11 +20,11 @@ protected:
 	Vector up;
 	Vector right;
 
-	float h, w;
+	double h, w;
 
 public:
-	PerspectiveCamera(float fov, float aspectRatio, Point origin, Point target, Vector up);
-	PerspectiveCamera(Point origin, Vector direction, Vector up, float fov, float aspectRatio);
+	PerspectiveCamera(double fov, double aspectRatio, Point origin, Point target, Vector up);
+	PerspectiveCamera(Point origin, Vector direction, Vector up, double fov, double aspectRatio);
 
 	virtual Ray makeRay(Vector2 point) const;
 };

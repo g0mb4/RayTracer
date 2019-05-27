@@ -1,6 +1,6 @@
 #include "collisionresponse.h"
 
-CollisionResponse::CollisionResponse(Intersection & intersection, Ray * ray, float refl_index_medium, ShapeSet * scene, Ray * reflected, Ray * refracted){
+CollisionResponse::CollisionResponse(Intersection & intersection, Ray * ray, double refl_index_medium, ShapeSet * scene, Ray * reflected, Ray * refracted){
 	switch (intersection.pShape->type) {
 	case T_PLANE :
 		planeCollision((Plane*)intersection.pShape, intersection.position(), ray, refl_index_medium, scene, reflected, refracted);
@@ -22,12 +22,12 @@ Ray CollisionResponse::reflect(const Ray * r, const Point& c, const Vector& norm
 }
 
 // http://cosinekitty.com/raytrace/chapter09_refraction.html
-Ray CollisionResponse::refract(const Ray * r, const Point& c, const Vector& normal, float n1, float n2) {
+Ray CollisionResponse::refract(const Ray * r, const Point& c, const Vector& normal, double n1, double n2) {
 	Ray ret = *r;
 	ret.valid = false;
 
-	auto solveQuadratic = [](float a, float b, float c, float * res) {
-		float D = (b * b) - 4 * a * c;
+	auto solveQuadratic = [](double a, double b, double c, double * res) {
+		double D = (b * b) - 4 * a * c;
 
 		if (D < 0) {
 			return false;
@@ -40,8 +40,8 @@ Ray CollisionResponse::refract(const Ray * r, const Point& c, const Vector& norm
 		}
 	};
 
-	float cos_a1 = dot(r->direction, normal);
-	float sin_a1 = 0;
+	double cos_a1 = dot(r->direction, normal);
+	double sin_a1 = 0;
 
 	if (cos_a1 <= -1.0f) {
 		cos_a1 = -1.0f;  // clamp to lower limit
@@ -54,8 +54,8 @@ Ray CollisionResponse::refract(const Ray * r, const Point& c, const Vector& norm
 		sin_a1 = sqrtf(1.0f - cos_a1 * cos_a1);
 	}
 
-	float n_ratio = n1 / n2;
-	float sin_a2 = n_ratio * sin_a1;
+	double n_ratio = n1 / n2;
+	double sin_a2 = n_ratio * sin_a1;
 
 	if (sin_a2 <= -1.0f || sin_a2 >= +1.0f) {
 		// Since sin_a2 is outside the bounds -1..+1, then
@@ -63,17 +63,17 @@ Ray CollisionResponse::refract(const Ray * r, const Point& c, const Vector& norm
 		// means that the ray experiences total internal reflection,
 		// so that no refracted ray exists.
 	} else {
-		float res[2];
+		double res[2];
 
 		if (!solveQuadratic(1.0f, 2.0f * cos_a1, 1.0f - (1.0f / (n_ratio*n_ratio)), res)) {
 			return ret;
 		}
 
-		float max_alignment = -1.0f;
+		double max_alignment = -1.0f;
 		Vector refract_dir;
 		for (int k = 0; k < 2; k++) {
 			Vector refract_attempt = r->direction + normal * res[k];
-			float alignment = dot(r->direction, refract_attempt);
+			double alignment = dot(r->direction, refract_attempt);
 			if (alignment > max_alignment) {
 				max_alignment = alignment;
 				refract_dir = refract_attempt;
@@ -138,10 +138,10 @@ double CollisionResponse::polarizedReflection(double n1, double n2, double cos_a
 	return reflection;
 }
 
-void CollisionResponse::planeCollision(Plane * p, Point c, Ray * ray, float refl_index_medium, ShapeSet * scene, Ray * reflected, Ray * refracted) {
+void CollisionResponse::planeCollision(Plane * p, Point c, Ray * ray, double refl_index_medium, ShapeSet * scene, Ray * reflected, Ray * refracted) {
 	printf("plane collision at (%f, %f, %f)\n", c.x, c.y, c.z);
 
-	float n1 = refl_index_medium;	// dafault: ray outside droplet, source refl = medium
+	double n1 = refl_index_medium;	// dafault: ray outside droplet, source refl = medium
 
 	for (auto s : scene->shapes) {
 		if (s->type == T_ELLIPSOID) {
@@ -161,7 +161,7 @@ void CollisionResponse::planeCollision(Plane * p, Point c, Ray * ray, float refl
 	}
 }
 
-void CollisionResponse::ellipsoidCollision(Ellipsoid * s, Point c, Ray * ray, float refl_index_medium, Ray * reflected, Ray * refracted) {
+void CollisionResponse::ellipsoidCollision(Ellipsoid * s, Point c, Ray * ray, double refl_index_medium, Ray * reflected, Ray * refracted) {
 	printf("ellipsoid collision at (%f, %f, %f)\n", c.x, c.y, c.z);
 
 	auto distance = [](Point a, Point b) {
@@ -171,8 +171,8 @@ void CollisionResponse::ellipsoidCollision(Ellipsoid * s, Point c, Ray * ray, fl
 	};
 
 
-	float n1 = 1;
-	float n2 = 1;
+	double n1 = 1;
+	double n2 = 1;
 
 	if (s->isInside(ray->origin)) {
 		n1 = s->reflection;

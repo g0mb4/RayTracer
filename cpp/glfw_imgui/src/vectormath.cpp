@@ -12,12 +12,12 @@ Vector::Vector(const Vector& v)
 {
 }
 
-Vector::Vector(float x, float y, float z)
+Vector::Vector(double x, double y, double z)
 	: x(x), y(y), z(z)
 {
 }
 
-Vector::Vector(float f)
+Vector::Vector(double f)
 	: x(f), y(f), z(f)
 {
 }
@@ -26,12 +26,12 @@ Vector::~Vector()
 {
 }
 
-float Vector::length2()
+double Vector::length2()
 {
 	return x*x + y*y + z*z;
 }
 
-float Vector::length()
+double Vector::length()
 {
 	return std::sqrt(length2());
 }
@@ -43,16 +43,16 @@ Vector Vector::normal()
 	return v;
 }
 
-float Vector::normal_len()
+double Vector::normal_len()
 {
-	float l = length();
+	double l = length();
 
 	*this /= l;
 
 	return l;
 }
 
-float dot(Vector v1, Vector v2)
+double dot(Vector v1, Vector v2)
 {
 	return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 }
@@ -89,7 +89,7 @@ Vector& Vector::operator -=(const Vector& v)
 	return *this;
 }
 
-Vector& Vector::operator *=(float f)
+Vector& Vector::operator *=(double f)
 {
 	x *= f;
 	y *= f;
@@ -97,7 +97,7 @@ Vector& Vector::operator *=(float f)
 	return *this;
 }
 
-Vector& Vector::operator /=(float f)
+Vector& Vector::operator /=(double f)
 {
 	x /= f;
 	y /= f;
@@ -121,12 +121,12 @@ Vector2::Vector2(const Vector2 &v)
 {
 }
 
-Vector2::Vector2(float u, float v)
+Vector2::Vector2(double u, double v)
 	: u(u), v(v)
 {
 }
 
-Vector2::Vector2(float f)
+Vector2::Vector2(double f)
 	: u(f), v(f)
 {
 }

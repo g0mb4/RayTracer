@@ -23,7 +23,7 @@ Ray::Ray(const Ray& r)
 	}
 }
 
-Ray::Ray(const Point& origin, const Vector& direction, float tMax)
+Ray::Ray(const Point& origin, const Vector& direction, double tMax)
 	: origin(origin),
 	direction(direction),
 	tMax(tMax),
@@ -49,7 +49,7 @@ Ray& Ray::operator =(const Ray& r)
 	return *this;
 }
 
-Point Ray::calculate(float t) const
+Point Ray::calculate(double t) const
 {
 	return origin + direction * t;
 }

@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-PerspectiveCamera::PerspectiveCamera(float fov, float aspectRatio, Point origin, Point target, Vector up)
+PerspectiveCamera::PerspectiveCamera(double fov, double aspectRatio, Point origin, Point target, Vector up)
 	: origin(origin)
 {
 	forward = (target - origin).normal();
@@ -13,7 +13,7 @@ PerspectiveCamera::PerspectiveCamera(float fov, float aspectRatio, Point origin,
 	w = h * aspectRatio;
 }
 
-PerspectiveCamera::PerspectiveCamera(Point origin, Vector direction, Vector up, float fov, float aspectRatio)
+PerspectiveCamera::PerspectiveCamera(Point origin, Vector direction, Vector up, double fov, double aspectRatio)
 	: origin(origin)
 {
 	forward = direction.normal();
