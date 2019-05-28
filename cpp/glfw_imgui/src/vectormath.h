@@ -1,5 +1,7 @@
-#ifndef MATHS_H
-#define MATHS_H
+#ifndef __VECTORMATH_H__
+#define __VECTORMATH_H__
+
+#include <string>
 
 #ifndef NULL
 	#define NULL 0
@@ -26,13 +28,14 @@ struct Vector
 	Vector normal();
 	double normal_len();
 	
-
 	Vector& operator =(const Vector& v);
 	Vector& operator +=(const Vector& v);
 	Vector& operator -=(const Vector& v);
 	Vector& operator *=(double f);
 	Vector& operator /=(double f);
 	Vector operator -() const;
+
+	std::string to_str(void) const;
 };
 
 double dot(Vector v1, Vector v2);

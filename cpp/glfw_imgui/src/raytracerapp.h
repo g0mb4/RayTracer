@@ -112,6 +112,8 @@ private:
 	bool autom_alpha;
 	double autom_alpha_start, autom_alpha_step, autom_alpha_end;
 
+	double prev_energy, prev_ctr;
+
 	Data_Set data_set;
 	std::vector<char *> data_set_items;
 };

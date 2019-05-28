@@ -106,7 +106,7 @@ bool Plane::doesIntersect(const Ray& ray)
 	// Find point of intersection
 	float t = dot(position - ray.origin, normal) / dDotN;
 
-	if (t <= RAY_T_MIN || t >= ray.tMax)
+	if (t <= RAY_T_MIN || t >= RAY_T_MAX)
 	{
 		// Outside relevant range
 		return false;
@@ -227,11 +227,11 @@ bool Ellipsoid::doesIntersect(const Ray& ray)
 
 	// Find two points of intersection, t1 close and t2 far
 	float t1 = (-b - std::sqrt(discriminant)) / (2 * a);
-	if (t1 > RAY_T_MIN && t1 < ray.tMax)
+	if (t1 > RAY_T_MIN && t1 < RAY_T_MAX)
 		return true;
 
 	float t2 = (-b + std::sqrt(discriminant)) / (2 * a);
-	if (t2 > RAY_T_MIN && t2 < ray.tMax)
+	if (t2 > RAY_T_MIN && t2 < RAY_T_MAX)
 		return true;
 
 	return false;

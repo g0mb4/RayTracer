@@ -52,6 +52,12 @@ double Vector::normal_len()
 	return l;
 }
 
+std::string Vector::to_str(void) const {
+	char buf[128];
+	snprintf(buf, sizeof(buf), "(%f, %f, %f)", x, y, z);
+	return std::string(buf);
+}
+
 double dot(Vector v1, Vector v2)
 {
 	return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;

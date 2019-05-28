@@ -74,6 +74,8 @@ RayTracerApp::RayTracerApp(int w, int h) {
 	data_set.create("plane_energy");
 	data_set.create("plane_collisions");
 
+	prev_ctr = 0;
+
 	if (!glfwInit()) {
 		return;
 	}
@@ -159,7 +161,7 @@ RayTracerApp::~RayTracerApp(void) {
 
 void RayTracerApp::sim_step(void) {
 	std::vector<Ray> new_set;
-
+	
 	for (auto ray : rays) {
 		if (ray.valid) {
 			Intersection intersection(ray);
@@ -169,8 +171,8 @@ void RayTracerApp::sim_step(void) {
 
 				CollisionResponse c(intersection, &ray, refl_index_medium, &scene, &reflected, &refracted);
 
-				printf("  reflected: %f %s (%s) dir: (%f; %f; %f)\n", reflected.energy, reflected.energy == 0.0 ? "(ZERO)" : "", reflected.valid ? "vaild" : "invalid", reflected.direction.x, reflected.direction.y, reflected.direction.z);
-				printf("  refracted: %f (%s) dir: (%f; %f; %f)\n", refracted.energy, refracted.valid ? "vaild" : "invalid", refracted.direction.x, refracted.direction.y, refracted.direction.z);
+//				printf("  reflected: %f %s (%s) dir: (%f; %f; %f)\n", reflected.energy, reflected.energy == 0.0 ? "(ZERO)" : "", reflected.valid ? "vaild" : "invalid", reflected.direction.x, reflected.direction.y, reflected.direction.z);
+//				printf("  refracted: %f (%s) dir: (%f; %f; %f)\n", refracted.energy, refracted.valid ? "vaild" : "invalid", refracted.direction.x, refracted.direction.y, refracted.direction.z);
 
 				if (intersection.pShape->type == T_PLANE) {
 					total_plane_collisions++;
@@ -180,7 +182,7 @@ void RayTracerApp::sim_step(void) {
 					}
 
 					if (refracted.valid) {
-						total_plane_energy += refracted.energy;
+						total_plane_energy += refracted.energy;	// recracted is not needed anymore
 					}
 
 				} else {
@@ -196,13 +198,15 @@ void RayTracerApp::sim_step(void) {
 		}
 	}
 
-//	if (rays != new_set) {
-		rays = new_set;
-		printf("new set: %u\n", new_set.size());
-//	} else {
-//		rays.clear(); // end of sim
-//	}
+	printf("new set: %u\n", new_set.size());
+	for (auto r : new_set) {
+		printf("%s", r.to_str().c_str());
+	}
+
+	rays = new_set;
 	
+	no_rays = rays.size();
+
 	steps++;
 }
 
@@ -264,7 +268,9 @@ void RayTracerApp::sim_reset(void) {
 
 	// single ray
 	if (ray_group == 0) {
-		rays.push_back(Ray(Point(start_pos_x, start_pos_y, start_pos_z), Vector(cosd(alpha), sind(alpha), 0)));
+		Ray r = Ray(Point(start_pos_x, start_pos_y, start_pos_z), Vector(cosd(alpha), sind(alpha), 0));
+		r.energy = 1.0;
+		rays.push_back(r);
 	}
 	else {
 		double d_y = lamp_width / (double)rays_per_width;
@@ -279,7 +285,9 @@ void RayTracerApp::sim_reset(void) {
 				break;
 			}
 			for (double z = start_z; z < end_z; z += d_z) {
-				rays.push_back(Ray(Point(start_pos_x, y, z), Vector(cosd(alpha), sind(alpha), 0)));
+				Ray r = Ray(Point(start_pos_x, y, z), Vector(cosd(alpha), sind(alpha), 0));
+				r.energy = 1.0;
+				rays.push_back(r);
 			}
 		}
 	}

@@ -9,23 +9,21 @@
 #include "vectormath.h"
 
 // In order to prevent bouncing rays self-intersecting
-#define RAY_T_MIN 0.0001f
+#define RAY_T_MIN 0.001
 
 // 'Infinite' distance, used as a default value
-//#define RAY_T_MAX 1.0e30f
-#define RAY_T_MAX 1000.0f
+#define RAY_T_MAX 1000.0
 
 struct Ray
 {
 	Point origin; // start
 	Vector direction;
-	double tMax;
 	bool valid;
 	double energy;
 
 	Ray();
 	Ray(const Ray& r);
-	Ray(const Point& origin, const Vector& direction, double tMax = RAY_T_MAX);
+	Ray(const Point& origin, const Vector& direction);
 
 	virtual ~Ray() {};
 
@@ -33,10 +31,12 @@ struct Ray
 
 	Point calculate(double t) const;
 
-	void draw(void);
+	void draw(void) const;
 	void addPoint(Point p);
 
 	std::vector<Point> history;
+
+	std::string to_str(void) const;
 };
 
 class Shape;

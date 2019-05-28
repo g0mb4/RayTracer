@@ -15,7 +15,7 @@ CollisionResponse::CollisionResponse(Intersection & intersection, Ray * ray, dou
 Ray CollisionResponse::reflect(const Ray * r, const Point& c, const Vector& normal) {
 	Ray ret = *r;
 
-	ret.direction = (r->direction - (2.0f * dot(r->direction, normal)) * normal).normal();
+	ret.direction = (r->direction - (2.0 * dot(r->direction, normal)) * normal).normal();
 	ret.addPoint(c);
 
 	return ret;
@@ -118,6 +118,39 @@ Ray CollisionResponse::refract(const Ray * r, const Point& c, const Vector& norm
 	return ret;
 }
 
+// Bram de Greve : Reflections and Refractions in Ray Tracing 
+Ray CollisionResponse::refract2(const Ray * r, const Point& c, const Vector& normal, double n1, double n2) {
+	Ray ret = *r;
+	ret.valid = false;
+
+	double cos_theta_i = dot(r->direction, normal);		// (8)
+	double sin2_theta_t = (n1 / n2) * (n1 / n2) * (1 - cos_theta_i * cos_theta_i);	// (23)
+
+	// (24)
+	if (sin2_theta_t <= 1) {
+		double n1_per_n2 = n1 / n2;
+		ret.direction = (n1_per_n2 * r->direction + (n1_per_n2 * cos_theta_i - sqrtf(1 - sin2_theta_t)) * normal).normal();	// (22)
+		ret.addPoint(c);
+
+		ret.valid = true;
+
+		double cos_theta_t = sqrtf(1 - sin2_theta_t);	// (28)
+
+		auto sqr = [](double a) {
+			return a * a;
+		};
+
+		double Rs = sqr((n1 * cos_theta_i - n2 * cos_theta_t) / (n1 * cos_theta_i + n2 * cos_theta_t));	// (27a)
+		double Rp = sqr((n2 * cos_theta_i - n1 * cos_theta_t) / (n2 * cos_theta_i + n1 * cos_theta_t));	// (27b)
+
+		double R = (Rs + Rp) / 2.0; // (29a)
+
+		ret.energy *= R;
+	}
+
+	return ret;
+}
+
 double CollisionResponse::polarizedReflection(double n1, double n2, double cos_a1, double cos_a2) {
 	double left = n1 * cos_a1;
 	double right = n2 * cos_a2;
@@ -155,21 +188,17 @@ void CollisionResponse::planeCollision(Plane * p, Point c, Ray * ray, double ref
 
 	*reflected = reflect(ray, c, p->normal);
 	*refracted = refract(ray, c, p->normal, n1, p->reflection);
+	//*refracted = refract2(ray, c, p->normal, n1, p->reflection);
 
 	if (refracted->valid) {
 		reflected->energy -= refracted->energy;
+	} else {
+		reflected->energy = 0;
 	}
 }
 
 void CollisionResponse::ellipsoidCollision(Ellipsoid * s, Point c, Ray * ray, double refl_index_medium, Ray * reflected, Ray * refracted) {
 	printf("ellipsoid collision at (%f, %f, %f)\n", c.x, c.y, c.z);
-
-	auto distance = [](Point a, Point b) {
-		return sqrtf((a.x - b.x) * (a.x - b.x) +
-			(a.y - b.y) * (a.y - b.y) +
-			(a.z - b.z) * (a.z - b.z));
-	};
-
 
 	double n1 = 1;
 	double n2 = 1;
@@ -186,9 +215,12 @@ void CollisionResponse::ellipsoidCollision(Ellipsoid * s, Point c, Ray * ray, do
 
 	*reflected = reflect(ray, c, normal);
 	*refracted = refract(ray, c, normal, n1, n2);
+	//*refracted = refract2(ray, c, normal, n1, n2);
 
 	if (refracted->valid) {
 		reflected->energy -= refracted->energy;
+	} else {
+		reflected->energy = 0;
 	}
 }
 

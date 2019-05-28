@@ -17,6 +17,7 @@ private:
 
 	Ray reflect(const Ray * r, const Point& c, const Vector& normal);
 	Ray refract(const Ray * r, const Point& c, const Vector& normal, double n1, double n2);
+	Ray refract2(const Ray * r, const Point& c, const Vector& normal, double n1, double n2);
 
 	double polarizedReflection(double n1, double n2, double cos_a1, double cos_a2);
 };

@@ -1,21 +1,13 @@
 #include "ray.h"
 
 Ray::Ray()
-	: origin(0.0f, 0.0f, 0.0f),
-	direction(),
-	tMax(RAY_T_MAX),
-	energy(1.0f),
-	valid(true)
+	: origin(0.0f, 0.0f, 0.0f), direction(), energy(0.0f), valid(true)
 {
 	history.push_back(origin);
 }
 
 Ray::Ray(const Ray& r)
-	: origin(r.origin),
-	direction(r.direction),
-	tMax(r.tMax),
-	energy(r.energy),
-	valid(true)
+	: origin(r.origin), direction(r.direction), energy(r.energy), valid(true)
 {
 	history.clear();
 	for (unsigned int i = 0; i < r.history.size(); i++) {
@@ -23,12 +15,8 @@ Ray::Ray(const Ray& r)
 	}
 }
 
-Ray::Ray(const Point& origin, const Vector& direction, double tMax)
-	: origin(origin),
-	direction(direction),
-	tMax(tMax),
-	energy(1.0f),
-	valid(true)
+Ray::Ray(const Point& origin, const Vector& direction)
+	: origin(origin), direction(direction), energy(0.0f), valid(true)
 {
 	history.push_back(origin);
 }
@@ -37,7 +25,6 @@ Ray& Ray::operator =(const Ray& r)
 {
 	origin = r.origin;
 	direction = r.direction;
-	tMax = r.tMax;
 	energy = r.energy;
 	valid = r.valid;
 
@@ -56,10 +43,14 @@ Point Ray::calculate(double t) const
 
 void Ray::addPoint(Point p) {
 	history.push_back(p);
-	origin = p + RAY_T_MIN * direction;
+	printf("    added: %s\n",p.to_str().c_str());
+	origin = p;
+	//origin = p + RAY_T_MIN * direction;
+
+	//printf("    new: %s\n", origin.to_str().c_str());
 }
 
-void Ray::draw(void) {
+void Ray::draw(void) const{
 	glPushMatrix();
 		glBegin(GL_LINES);
 			int i = 0;
@@ -85,30 +76,33 @@ void Ray::draw(void) {
 	glPopMatrix();
 }
 
-Intersection::Intersection()
-	: ray(),
-	t(RAY_T_MAX),
-	pShape(NULL)
-{
+
+std::string Ray::to_str(void) const {
+	char buf[2048];
+	snprintf(buf, sizeof(buf), "  p: %s   d: %s   e: %f %s   %s\n", origin.to_str().c_str(), direction.to_str().c_str(), energy, energy == 0.0 ? "Z" : " ", valid ? "valid" : "invalid" );
+	std::string s(buf);
+	for (auto v : history) {
+		snprintf(buf, sizeof(buf), "    %s\n", v.to_str().c_str());
+		s.append(buf);
+	}
+
+	return s;
 }
+
+Intersection::Intersection()
+	: ray(), t(RAY_T_MAX), pShape(NULL)
+{}
 
 Intersection::Intersection(const Intersection& i)
-	: ray(i.ray),
-	t(i.t),
-	pShape(i.pShape)
-{
-}
+	: ray(i.ray), t(i.t), pShape(i.pShape)
+{}
 
 Intersection::Intersection(const Ray& ray)
-	: ray(ray),
-	t(ray.tMax),
-	pShape(NULL)
-{
-}
+	: ray(ray), t(RAY_T_MAX), pShape(NULL)
+{}
 
 Intersection::~Intersection()
-{
-}
+{}
 
 Intersection& Intersection::operator =(const Intersection& i)
 {
