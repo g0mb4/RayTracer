@@ -337,8 +337,8 @@ void RayTracerApp::sim_reset(void) {
 
         rays.push_back(r);
     } else {
-        double step_y = lamp_height / (double)rays_per_height;
-        double step_z = lamp_width / (double)rays_per_width;
+        double step_y = lamp_height / (double)(rays_per_height - 1);
+        double step_z = lamp_width / (double)(rays_per_width - 1);
 
         double alpha1 = 180 - alpha;
 
@@ -353,6 +353,7 @@ void RayTracerApp::sim_reset(void) {
             for (int nz = 0; nz < rays_per_width; nz++) {
                 double x = lamp_distance;
                 double y = 1.0 - (ny * step_y);
+				//double y = ny * step_y;
                 double z = offset_pos_z + (nz * step_z);
 
                 double x_rot =
