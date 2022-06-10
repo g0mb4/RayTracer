@@ -1,0 +1,5 @@
+bin/
+obj/
+msvc/
+premake5.exe
+
